@@ -29,6 +29,16 @@ export async function storeImage(file: MultipartFile, folder = 'uploads'): Promi
   return key
 }
 
+const RAW_TYPES: Record<string, string> = { mp4: 'video/mp4', webm: 'video/webm', gif: 'image/gif' }
+
+/** Guarda el archivo sin transformar (videos y GIF animados conservan su movimiento) */
+export async function storeRaw(file: MultipartFile, folder: string, ext: string): Promise<string> {
+  const now = new Date()
+  const key = `${folder}/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${cuid()}.${ext}`
+  await drive.use().put(key, await readFile(file.tmpPath!), { contentType: RAW_TYPES[ext] ?? 'application/octet-stream' })
+  return key
+}
+
 /** Elimina una imagen sin fallar si no existe o si es una URL externa */
 export async function deleteImage(key: string | null | undefined) {
   if (!key || /^https?:\/\//.test(key)) return

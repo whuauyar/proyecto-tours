@@ -74,6 +74,42 @@ export function ImageInput({
   )
 }
 
+/* ---------- Carga de un video (portada) ---------- */
+export function VideoInput({ url, onChange, folder = 'site' }: { url: string; onChange: (url: string) => void; folder?: string }) {
+  const ref = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+  const toast = useToast()
+  const pick = async (file?: File) => {
+    if (!file) return
+    if (file.size > 50 * 1024 * 1024) return toast('El video puede pesar hasta 50 MB (recomendado: menos de 8 MB)', 'error')
+    setBusy(true)
+    try {
+      const r = await uploadImage(file, folder)
+      onChange(r.url)
+    } catch (e) {
+      toast((e as Error).message, 'error')
+    } finally {
+      setBusy(false)
+      if (ref.current) ref.current.value = ''
+    }
+  }
+  return (
+    <div className="image-input">
+      <span className="field-label">Video de fondo (opcional)</span>
+      <div className="image-input__box" style={{ aspectRatio: '16/9' }}>
+        {url ? <video src={url} muted loop autoPlay playsInline /> : <span className="muted">MP4 o WebM, 8–15 s en bucle, sin audio</span>}
+        {busy && <div className="image-input__busy">Subiendo…</div>}
+      </div>
+      <div className="image-input__actions">
+        <button type="button" className="btn btn--sm" onClick={() => ref.current?.click()} disabled={busy}>{url ? 'Cambiar video' : 'Subir video'}</button>
+        {url && <button type="button" className="btn btn--sm btn--danger-ghost" onClick={() => onChange('')}>Quitar</button>}
+      </div>
+      <small className="muted">Si hay video, la imagen de portada se muestra mientras carga y a quienes tienen activado "reducir movimiento".</small>
+      <input ref={ref} type="file" accept="video/mp4,video/webm" hidden onChange={(e) => pick(e.target.files?.[0])} />
+    </div>
+  )
+}
+
 /* ---------- Editor de listas de texto (incluye / no incluye) ---------- */
 export function ListEditor({ value, onChange, placeholder }: { value: string[]; onChange: (v: string[]) => void; placeholder?: string }) {
   return (

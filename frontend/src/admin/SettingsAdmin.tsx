@@ -4,7 +4,7 @@ import { LANG_META } from '../i18n'
 import { useSite } from '../site'
 import { LANGS, type Lang, type SiteSettings, type Tr } from '../types'
 import { FEATURE_ICONS } from '../components/Icons'
-import { Field, ImageInput, LangTabs, TrInput, missingLangs, useToast } from './ui'
+import { Field, ImageInput, LangTabs, TrInput, VideoInput, missingLangs, useToast } from './ui'
 
 const SECTIONS = [
   ['general', 'Identidad y colores'],
@@ -120,9 +120,11 @@ export default function SettingsAdmin() {
               <TrInput label="Eslogan" value={s.tagline} onChange={(tagline) => set({ tagline })} lang={lang} />
               <TrInput label="Título principal" value={s.heroTitle} onChange={(heroTitle) => set({ heroTitle })} lang={lang} />
               <TrInput label="Subtítulo" value={s.heroSubtitle} onChange={(heroSubtitle) => set({ heroSubtitle })} lang={lang} multiline rows={2} />
-              {text('heroVideoUrl', 'Video de fondo (opcional)', 'URL directa a un archivo .mp4 o .webm. La imagen se usa mientras carga y en móviles con ahorro de datos.')}
             </div>
-            <ImageInput label="Imagen de portada" folder="site" value={s.heroImageKey} url={s.heroImageUrl} onChange={(heroImageKey, heroImageUrl) => set({ heroImageKey, heroImageUrl })} />
+            <div className="stack">
+              <ImageInput label="Imagen de portada (o GIF animado)" folder="site" value={s.heroImageKey} url={s.heroImageUrl} onChange={(heroImageKey, heroImageUrl) => set({ heroImageKey, heroImageUrl })} />
+              <VideoInput url={s.heroVideoUrl} onChange={(heroVideoUrl) => set({ heroVideoUrl })} />
+            </div>
           </div>
         </div>
       )}

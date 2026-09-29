@@ -22,7 +22,10 @@ function Hero() {
     if (dest) p.set('destino', dest)
     navigate(`${path('/tours')}?${p}`)
   }
-  const video = site?.heroVideoUrl && /\.(mp4|webm)(\?|$)/i.test(site.heroVideoUrl) ? site.heroVideoUrl : null
+  // Respeta "reducir movimiento" y el modo de ahorro de datos: en esos casos solo imagen
+  const calm = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData)
+  const video = !calm && site?.heroVideoUrl && /\.(mp4|webm)(\?|$)/i.test(site.heroVideoUrl) ? site.heroVideoUrl : null
   return (
     <section className="hero">
       {video ? (
