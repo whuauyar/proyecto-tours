@@ -151,7 +151,7 @@ function ensureCjkFont() {
   const link = document.createElement('link')
   link.id = 'font-zh'
   link.rel = 'stylesheet'
-  link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap'
+  link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap'
   document.head.appendChild(link)
 }
 

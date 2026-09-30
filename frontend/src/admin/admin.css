@@ -1,10 +1,10 @@
 /* ===== Panel administrador ===== */
-.admin { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; background: #f4f1ec; }
-.admin__side { background: var(--ink); color: #d8cfc3; padding: 20px 14px; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 0; height: 100vh; }
+.admin { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; background: #f3f6f8; }
+.admin__side { background: var(--accent); color: #cfe3ee; padding: 20px 14px; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 0; height: 100vh; }
 .admin__brand { font-family: var(--display); font-size: 1.3rem; color: #fff; padding: 0 10px; }
 .admin__side nav { display: flex; flex-direction: column; gap: 2px; }
 .admin__side nav a { padding: 10px 12px; border-radius: 10px; text-decoration: none; display: flex; justify-content: space-between; align-items: center; font-size: 0.93rem; }
-.admin__side nav a:hover { background: #2f2a25; color: #fff; }
+.admin__side nav a:hover { background: rgba(255,255,255,.1); color: #fff; }
 .admin__side nav a.active { background: var(--primary); color: #fff; }
 .admin__site-link { margin-top: auto; font-size: 0.85rem; text-decoration: none; padding: 0 10px; }
 .pill { background: var(--gold); color: var(--ink); border-radius: 999px; padding: 0 8px; font-size: 0.75rem; font-weight: 700; }
@@ -37,7 +37,7 @@
 }
 
 /* Login */
-.login { min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--ink); }
+.login { min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--accent); }
 .login__card { width: 100%; max-width: 380px; }
 .login__card h1 { font-size: 1.5rem; }
 
