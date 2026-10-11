@@ -125,6 +125,22 @@ Un proyecto con 4 piezas: **Postgres**, **Bucket**, **backend** y **frontend**. 
 
 El seeder es idempotente: en cada deploy solo crea el admin si no existe y los datos de ejemplo si no hay tours.
 
+## Bot de WhatsApp (WhatsApp Cloud API de Meta)
+
+El backend expone `GET/POST /webhooks/whatsapp`. El bot repite la lógica del asistente web: menú con lista,
+tours por destino o populares, detalle con enlace, preguntas frecuentes, búsqueda por texto,
+cotización paso a paso (se guarda en **Consultas** como `[WhatsApp]`) y paso a asesor
+(el bot calla 24 h en ese chat; el cliente vuelve al bot escribiendo *menú*). Idiomas: ES/EN/PT/中文.
+
+Variables del servicio `backend`: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`,
+`WHATSAPP_APP_SECRET`, `WHATSAPP_API_VERSION` (por defecto `v23.0`) y `SITE_URL` (URL del frontend).
+Sin `WHATSAPP_TOKEN` el bot queda apagado.
+
+Alta en Meta: developers.facebook.com → Crear app (tipo Empresa) → agregar producto WhatsApp →
+copiar *Phone number ID* y generar token permanente (usuario de sistema en Business Settings) →
+Webhook: URL `https://<backend>/webhooks/whatsapp`, token de verificación = `WHATSAPP_VERIFY_TOKEN`,
+suscribir el campo `messages`.
+
 ## API (resumen)
 
 Pública: `GET /api/settings`, `GET /api/navigation` (destinos, tipos, páginas), `GET /api/destinations/:slug`, `GET /api/tours?destination=&category=&duration=day|multi&sort=price_asc|price_desc|duration&featured=1&q=`, `GET /api/tours/:slug` (incluye relacionados), `GET /api/faqs`, `GET /api/pages/:slug`, `POST /api/inquiries`, `POST /api/auth/login`, `GET /media/*`.

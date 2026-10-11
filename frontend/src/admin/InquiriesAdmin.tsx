@@ -46,7 +46,7 @@ export default function InquiriesAdmin() {
               </select>
             </div>
             <div className="inquiry__data small">
-              <a href={`mailto:${i.email}`}>{i.email}</a>
+              {i.email && <a href={`mailto:${i.email}`}>{i.email}</a>}
               {i.phone && <a href={waLink(i.phone)} target="_blank" rel="noreferrer">{i.phone}</a>}
               {i.country && <span>{i.country}</span>}
               {i.travelDate && <span>Viaje: {String(i.travelDate).slice(0, 10)}</span>}

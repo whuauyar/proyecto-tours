@@ -8,6 +8,7 @@ import { middleware } from '#start/kernel'
 
 const PublicController = () => import('#controllers/public_controller')
 const MediaController = () => import('#controllers/media_controller')
+const WhatsappController = () => import('#controllers/whatsapp_controller')
 const AuthController = () => import('#controllers/auth_controller')
 const UploadsController = () => import('#controllers/admin/uploads_controller')
 const CategoriesController = () => import('#controllers/admin/categories_controller')
@@ -21,6 +22,10 @@ const InquiriesController = () => import('#controllers/admin/inquiries_controlle
 router.get('/', async () => ({ name: 'tours-api', status: 'ok' }))
 router.get('/health', async () => ({ status: 'ok' }))
 router.get('/media/*', [MediaController, 'show'])
+
+/** Webhook del bot de WhatsApp (Meta WhatsApp Cloud API) */
+router.get('/webhooks/whatsapp', [WhatsappController, 'verify'])
+router.post('/webhooks/whatsapp', [WhatsappController, 'receive'])
 
 /** API pública (sitio web) */
 router

@@ -38,6 +38,15 @@ export default await Env.create(new URL('../', import.meta.url), {
   /** Usuario administrador inicial (lo crea el seeder) */
   ADMIN_EMAIL: Env.schema.string.optional(),
   ADMIN_PASSWORD: Env.schema.string.optional(),
+  /** Bot de WhatsApp (WhatsApp Cloud API de Meta) */
+  WHATSAPP_TOKEN: Env.schema.string.optional(),
+  WHATSAPP_PHONE_NUMBER_ID: Env.schema.string.optional(),
+  WHATSAPP_VERIFY_TOKEN: Env.schema.string.optional(),
+  WHATSAPP_APP_SECRET: Env.schema.string.optional(),
+  WHATSAPP_API_VERSION: Env.schema.string.optional(),
+  WHATSAPP_API_BASE: Env.schema.string.optional(),
+  /** URL pública del sitio (frontend), para los enlaces que envía el bot */
+  SITE_URL: Env.schema.string.optional(),
   /** Crear tours/categorías de ejemplo si la base está vacía (default: true) */
   SEED_DEMO: Env.schema.boolean.optional(),
 })
