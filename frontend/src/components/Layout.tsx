@@ -6,6 +6,7 @@ import type { Lang } from '../types'
 import Img from './Img'
 import { IconChevron, IconGlobe, IconMail, IconMenu, IconPhone, IconWhatsApp, IconX } from './Icons'
 import { L, waLink } from './common'
+import ChatBot from './ChatBot'
 
 function useOutsideClose(onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null)
@@ -208,7 +209,7 @@ export default function Layout() {
       <Header />
       <main><Outlet /></main>
       <Footer />
-      {site?.whatsapp && (
+      {site?.chatbotEnabled ? <ChatBot /> : site?.whatsapp && (
         <a className="wa-float" href={waLink(site.whatsapp, t('helloGeneral'))} target="_blank" rel="noreferrer" aria-label={t('writeUs')}>
           <IconWhatsApp />
         </a>

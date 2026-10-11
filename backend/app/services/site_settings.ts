@@ -43,6 +43,10 @@ export interface SiteSettings {
   steps: Array<{ title: Tr; text: Tr }>
   testimonials: Array<{ name: string; country: string; rating: number; text: Tr }>
   partners: Array<{ name: string; imageKey: string | null; url: string }>
+  // Asistente virtual (chatbot guiado)
+  chatbotEnabled: boolean
+  chatbotName: string
+  chatbotGreeting: Tr
 }
 
 const t = (es: string, en: string, pt: string, zh: string): Tr => ({ es, en, pt, zh })
@@ -107,6 +111,14 @@ export const DEFAULT_SITE: SiteSettings = {
     { title: t('Disfruta', 'Enjoy', 'Aproveite', '享受'), text: t('Nosotros nos encargamos del resto.', 'We take care of the rest.', 'Nós cuidamos do resto.', '其余的交给我们。') },
   ],
   testimonials: [],
+  chatbotEnabled: true,
+  chatbotName: 'Inti',
+  chatbotGreeting: t(
+    'Hola, soy Inti, tu asistente de viaje. ¿Qué te gustaría conocer de Cusco?',
+    "Hi, I'm Inti, your travel assistant. What would you like to discover in Cusco?",
+    'Olá, sou o Inti, seu assistente de viagem. O que você gostaria de conhecer em Cusco?',
+    '你好，我是Inti，你的旅行助手。你想了解库斯科的哪些行程？'
+  ),
   partners: [],
 }
 

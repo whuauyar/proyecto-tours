@@ -15,6 +15,7 @@ const SECTIONS = [
   ['bloques', 'Bloques de portada'],
   ['testimonios', 'Testimonios'],
   ['aliados', 'Certificaciones'],
+  ['chatbot', 'Asistente virtual'],
 ] as const
 type Section = (typeof SECTIONS)[number][0]
 
@@ -44,7 +45,7 @@ export default function SettingsAdmin() {
   const removeArr = (k: 'features' | 'steps' | 'testimonials' | 'partners', i: number) => set({ [k]: (s[k] as unknown[]).filter((_, j) => j !== i) } as never)
 
   const allTr: Array<Tr | undefined> = [s.tagline, s.heroTitle, s.heroSubtitle, s.about, s.officeHours,
-    ...s.features.flatMap((f) => [f.title, f.text]), ...s.steps.flatMap((x) => [x.title, x.text]), ...s.testimonials.map((x) => x.text)]
+    s.chatbotGreeting, ...s.features.flatMap((f) => [f.title, f.text]), ...s.steps.flatMap((x) => [x.title, x.text]), ...s.testimonials.map((x) => x.text)]
   const tabs = <LangTabs lang={lang} onChange={setLang} missing={missingLangs(allTr)} enabled={s.languages} />
 
   const save = async (e: FormEvent) => {
@@ -248,6 +249,16 @@ export default function SettingsAdmin() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+      {section === 'chatbot' && (
+        <div className="card settings-card narrow">
+          {tabs}
+          <label className="check"><input type="checkbox" checked={s.chatbotEnabled} onChange={(e) => set({ chatbotEnabled: e.target.checked })} /> Mostrar el asistente en el sitio</label>
+          <p className="muted small">Si lo desactivas, vuelve el botón flotante de WhatsApp.</p>
+          {text('chatbotName', 'Nombre del asistente')}
+          <TrInput label="Saludo inicial" value={s.chatbotGreeting} onChange={(chatbotGreeting) => set({ chatbotGreeting })} lang={lang} multiline rows={2} />
+          <p className="muted small">El asistente responde con los tours, precios y preguntas frecuentes publicados. Las cotizaciones que arma llegan a "Consultas" con la etiqueta [Chatbot].</p>
         </div>
       )}
     </form>

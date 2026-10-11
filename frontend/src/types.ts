@@ -145,6 +145,9 @@ export interface SiteSettings {
   steps: Step[]
   testimonials: Testimonial[]
   partners: Partner[]
+  chatbotEnabled: boolean
+  chatbotName: string
+  chatbotGreeting: Tr
 }
 
 export interface Navigation {

@@ -1,0 +1,98 @@
+import type { Lang } from '../types'
+
+/** Textos del asistente virtual en los 4 idiomas */
+const es = {
+  open: 'Abrir asistente', close: 'Cerrar', online: 'En línea · responde al instante',
+  menuDest: 'Tours por destino', menuPopular: 'Tours más populares', menuFaq: 'Preguntas frecuentes',
+  menuQuote: 'Cotizar mi viaje', menuWhatsapp: 'Hablar con un asesor', back: 'Volver al menú',
+  pickDest: '¿Qué destino te interesa?', toursOf: 'Estos son los tours en', popularIntro: 'Los tours que más reservan nuestros viajeros:',
+  faqIntro: 'Elige una pregunta:', anythingElse: '¿Te ayudo con algo más?',
+  viewTour: 'Ver tour', quoteThis: 'Cotizar este', from: 'desde',
+  quoteIntro: 'Perfecto, armemos tu cotización. Son 5 datos rápidos.', quoteTour: 'Cotizaremos: ',
+  askDate: '¿En qué fecha viajas?', skipDate: 'Aún no sé la fecha',
+  askAdults: '¿Cuántos adultos viajan?', askChildren: '¿Y cuántos niños?', none: 'Ninguno',
+  askName: '¿Cuál es tu nombre?', askEmail: '¿A qué correo te enviamos la propuesta?', askPhone: 'Tu teléfono o WhatsApp (opcional)',
+  skip: 'Omitir', invalidEmail: 'Ese correo no parece válido, ¿lo revisas?',
+  summary: 'Resumen de tu consulta', estimate: 'Total estimado', date: 'Fecha', people: 'Viajeros',
+  adults: 'adultos', children: 'niños', send: 'Enviar consulta', edit: 'Empezar de nuevo',
+  sending: 'Enviando…', sent: '¡Listo! Recibimos tu consulta. Te responderemos en menos de 24 horas.',
+  error: 'No pude enviar la consulta. Puedes intentar de nuevo o escribirnos por WhatsApp.',
+  continueWa: 'Continuar por WhatsApp', waIntro: 'Te conecto con un asesor por WhatsApp:',
+  openWa: 'Abrir WhatsApp', placeholder: 'Escribe tu pregunta…', sendMsg: 'Enviar',
+  found: 'Esto es lo que encontré:', notFound: 'No encontré una respuesta exacta. ¿Prefieres hablar con un asesor o dejar tu consulta?',
+  leaveInquiry: 'Dejar mi consulta', generalTrip: 'Viaje a medida',
+  waMsg: 'Hola, quisiera información', waTour: 'Tour', waDate: 'Fecha', waPeople: 'Viajeros',
+}
+type Dict = typeof es
+
+const en: Dict = {
+  open: 'Open assistant', close: 'Close', online: 'Online · instant replies',
+  menuDest: 'Tours by destination', menuPopular: 'Most popular tours', menuFaq: 'FAQ',
+  menuQuote: 'Get a quote', menuWhatsapp: 'Talk to an advisor', back: 'Back to menu',
+  pickDest: 'Which destination are you interested in?', toursOf: 'Here are the tours in', popularIntro: 'Our travelers’ favourite tours:',
+  faqIntro: 'Choose a question:', anythingElse: 'Anything else I can help with?',
+  viewTour: 'View tour', quoteThis: 'Quote this', from: 'from',
+  quoteIntro: "Great, let's build your quote. Just 5 quick questions.", quoteTour: 'Quoting: ',
+  askDate: 'When are you traveling?', skipDate: "I don't know yet",
+  askAdults: 'How many adults?', askChildren: 'And how many children?', none: 'None',
+  askName: "What's your name?", askEmail: 'Which email should we send the proposal to?', askPhone: 'Your phone or WhatsApp (optional)',
+  skip: 'Skip', invalidEmail: "That email doesn't look right, could you check it?",
+  summary: 'Your enquiry', estimate: 'Estimated total', date: 'Date', people: 'Travelers',
+  adults: 'adults', children: 'children', send: 'Send enquiry', edit: 'Start over',
+  sending: 'Sending…', sent: "Done! We've received your enquiry and will reply within 24 hours.",
+  error: "I couldn't send the enquiry. Try again or message us on WhatsApp.",
+  continueWa: 'Continue on WhatsApp', waIntro: "I'll connect you with an advisor on WhatsApp:",
+  openWa: 'Open WhatsApp', placeholder: 'Type your question…', sendMsg: 'Send',
+  found: "Here's what I found:", notFound: "I couldn't find an exact answer. Would you like to talk to an advisor or leave an enquiry?",
+  leaveInquiry: 'Leave an enquiry', generalTrip: 'Tailor-made trip',
+  waMsg: "Hi, I'd like some information", waTour: 'Tour', waDate: 'Date', waPeople: 'Travelers',
+}
+
+const pt: Dict = {
+  open: 'Abrir assistente', close: 'Fechar', online: 'Online · resposta imediata',
+  menuDest: 'Passeios por destino', menuPopular: 'Passeios mais populares', menuFaq: 'Perguntas frequentes',
+  menuQuote: 'Fazer orçamento', menuWhatsapp: 'Falar com um consultor', back: 'Voltar ao menu',
+  pickDest: 'Qual destino te interessa?', toursOf: 'Estes são os passeios em', popularIntro: 'Os passeios mais reservados pelos nossos viajantes:',
+  faqIntro: 'Escolha uma pergunta:', anythingElse: 'Posso ajudar em mais alguma coisa?',
+  viewTour: 'Ver passeio', quoteThis: 'Orçar este', from: 'a partir de',
+  quoteIntro: 'Perfeito, vamos montar seu orçamento. São só 5 perguntas.', quoteTour: 'Orçamento: ',
+  askDate: 'Em que data você viaja?', skipDate: 'Ainda não sei a data',
+  askAdults: 'Quantos adultos?', askChildren: 'E quantas crianças?', none: 'Nenhuma',
+  askName: 'Qual é o seu nome?', askEmail: 'Para qual e-mail enviamos a proposta?', askPhone: 'Seu telefone ou WhatsApp (opcional)',
+  skip: 'Pular', invalidEmail: 'Esse e-mail não parece válido, pode verificar?',
+  summary: 'Resumo da sua consulta', estimate: 'Total estimado', date: 'Data', people: 'Viajantes',
+  adults: 'adultos', children: 'crianças', send: 'Enviar consulta', edit: 'Recomeçar',
+  sending: 'Enviando…', sent: 'Pronto! Recebemos sua consulta e responderemos em até 24 horas.',
+  error: 'Não consegui enviar a consulta. Tente novamente ou fale conosco pelo WhatsApp.',
+  continueWa: 'Continuar pelo WhatsApp', waIntro: 'Vou te conectar com um consultor pelo WhatsApp:',
+  openWa: 'Abrir WhatsApp', placeholder: 'Escreva sua pergunta…', sendMsg: 'Enviar',
+  found: 'Encontrei isto:', notFound: 'Não encontrei uma resposta exata. Prefere falar com um consultor ou deixar sua consulta?',
+  leaveInquiry: 'Deixar minha consulta', generalTrip: 'Viagem sob medida',
+  waMsg: 'Olá, gostaria de informações', waTour: 'Passeio', waDate: 'Data', waPeople: 'Viajantes',
+}
+
+const zh: Dict = {
+  open: '打开助手', close: '关闭', online: '在线 · 即时回复',
+  menuDest: '按目的地查看行程', menuPopular: '热门行程', menuFaq: '常见问题',
+  menuQuote: '获取报价', menuWhatsapp: '联系顾问', back: '返回菜单',
+  pickDest: '你对哪个目的地感兴趣？', toursOf: '以下是行程：', popularIntro: '游客最常预订的行程：',
+  faqIntro: '请选择一个问题：', anythingElse: '还有什么可以帮你的吗？',
+  viewTour: '查看行程', quoteThis: '为此报价', from: '起',
+  quoteIntro: '好的，我们来为你报价。只需回答5个简单问题。', quoteTour: '报价行程：',
+  askDate: '你计划哪天出发？', skipDate: '还不确定日期',
+  askAdults: '有几位成人？', askChildren: '有几位儿童？', none: '没有',
+  askName: '请问你的姓名？', askEmail: '我们将方案发送到哪个邮箱？', askPhone: '你的电话或WhatsApp（可选）',
+  skip: '跳过', invalidEmail: '邮箱格式似乎不正确，请检查一下。',
+  summary: '咨询摘要', estimate: '预估总价', date: '日期', people: '人数',
+  adults: '成人', children: '儿童', send: '提交咨询', edit: '重新开始',
+  sending: '提交中…', sent: '好的！我们已收到你的咨询，将在24小时内回复。',
+  error: '咨询提交失败。请重试或通过WhatsApp联系我们。',
+  continueWa: '通过WhatsApp继续', waIntro: '我为你接通WhatsApp顾问：',
+  openWa: '打开WhatsApp', placeholder: '输入你的问题…', sendMsg: '发送',
+  found: '我找到了这些：', notFound: '没有找到确切答案。你想联系顾问还是留下咨询？',
+  leaveInquiry: '留下咨询', generalTrip: '定制行程',
+  waMsg: '你好，我想了解行程信息', waTour: '行程', waDate: '日期', waPeople: '人数',
+}
+
+export const BOT_TEXT: Record<Lang, Dict> = { es, en, pt, zh }
+export type BotKey = keyof Dict
