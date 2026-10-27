@@ -88,14 +88,25 @@ function Header() {
   const { t, tr } = useI18n()
   const { site, nav } = useSite()
   const [open, setOpen] = useState(false)
+  const [logoFailed, setLogoFailed] = useState(false)
   const loc = useLocation()
   useEffect(() => setOpen(false), [loc.pathname])
+  useEffect(() => setLogoFailed(false), [site?.logoUrl])
+  // Con logo válido se muestra solo el logo (normalmente ya incluye el nombre);
+  // si no hay logo o no carga, se muestra el símbolo + el nombre, nunca ambos duplicados.
+  const showLogo = !!site?.logoUrl && !logoFailed
   return (
     <header className="site-header">
       <div className="container site-header__inner">
         <L to="/" className="brand">
-          {site?.logoUrl ? <img src={site.logoUrl} alt={site.name} /> : <span className="brand__mark">▲</span>}
-          <span>{site?.name ?? ''}</span>
+          {showLogo ? (
+            <img src={site!.logoUrl!} alt={site?.name ?? ''} onError={() => setLogoFailed(true)} />
+          ) : (
+            <>
+              <span className="brand__mark">▲</span>
+              <span>{site?.name ?? ''}</span>
+            </>
+          )}
         </L>
 
         <nav className={`main-nav ${open ? 'is-open' : ''}`} aria-label="Principal">

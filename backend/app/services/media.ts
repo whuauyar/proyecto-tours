@@ -5,6 +5,24 @@ import sharp from 'sharp'
 import { readFile } from 'node:fs/promises'
 import type { MultipartFile } from '@adonisjs/core/bodyparser'
 
+/** Traduce errores del bucket (S3) a un mensaje claro para el panel */
+async function putSafe(key: string, data: Buffer, contentType: string) {
+  try {
+    await drive.use().put(key, data, { contentType })
+  } catch (error: any) {
+    const cause = error?.cause?.name ?? error?.cause?.Code ?? ''
+    if (/SignatureDoesNotMatch|InvalidAccessKeyId|AccessDenied/.test(cause)) {
+      throw new Error(
+        'El almacenamiento de imágenes rechazó las credenciales (bucket). Revisa ACCESS_KEY_ID y SECRET_ACCESS_KEY del backend en Railway y vuelve a desplegar.'
+      )
+    }
+    if (/NoSuchBucket/.test(cause)) {
+      throw new Error('El bucket de imágenes no existe. Revisa la variable BUCKET del backend en Railway.')
+    }
+    throw error
+  }
+}
+
 /** Convierte una key almacenada en la URL pública servida por /media/* */
 export function mediaUrl(key: string | null | undefined): string | null {
   if (!key) return null
@@ -25,7 +43,7 @@ export async function storeImage(file: MultipartFile, folder = 'uploads'): Promi
     .toBuffer()
   const now = new Date()
   const key = `${folder}/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${cuid()}.webp`
-  await drive.use().put(key, output, { contentType: 'image/webp' })
+  await putSafe(key, output, 'image/webp')
   return key
 }
 
@@ -35,7 +53,7 @@ const RAW_TYPES: Record<string, string> = { mp4: 'video/mp4', webm: 'video/webm'
 export async function storeRaw(file: MultipartFile, folder: string, ext: string): Promise<string> {
   const now = new Date()
   const key = `${folder}/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${cuid()}.${ext}`
-  await drive.use().put(key, await readFile(file.tmpPath!), { contentType: RAW_TYPES[ext] ?? 'application/octet-stream' })
+  await putSafe(key, await readFile(file.tmpPath!), RAW_TYPES[ext] ?? 'application/octet-stream')
   return key
 }
 
