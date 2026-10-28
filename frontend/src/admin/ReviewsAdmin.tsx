@@ -27,7 +27,7 @@ export default function ReviewsAdmin() {
     }
   }
   const remove = async (r: Review) => {
-    if (!window.confirm(`¿Eliminar definitivamente la reseña de ${r.name}?`)) return
+    if (!window.confirm(`¿Eliminar definitivamente el testimonio de ${r.name}?`)) return
     await api(`/api/admin/reviews/${r.id}`, { method: 'DELETE' })
     setData((l) => l?.filter((x) => x.id !== r.id) ?? null)
   }
@@ -39,20 +39,17 @@ export default function ReviewsAdmin() {
   return (
     <>
       <div className="admin-head">
-        <h1>Reseñas de viajeros</h1>
+        <h1>Testimonios de viajeros</h1>
         <select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}>
           <option value="">Todas ({rows?.length ?? 0})</option>
           <option value="visible">Publicadas ({visible.length})</option>
           <option value="hidden">Ocultas ({(rows?.length ?? 0) - visible.length})</option>
         </select>
       </div>
+      <p className="muted">Los visitantes los escriben en la portada (sección "Lo que dicen nuestros viajeros") y se publican al instante. Puedes corregir nombre, país, texto o estrellas, ocultarlos o eliminarlos. Promedio publicado: <strong>{avg ? avg.toFixed(1) : '—'} ★</strong></p>
       {!site?.googleClientId && (
-        <div className="card notice">
-          <strong>El inicio de sesión con Google aún no está activo.</strong>
-          <p className="muted small">Los visitantes no verán el botón "Escribe tu reseña" hasta que se configure la variable <code>GOOGLE_CLIENT_ID</code> del backend en Railway.</p>
-        </div>
+        <p className="muted small">Opcional: con la variable <code>GOOGLE_CLIENT_ID</code> en el backend, el visitante puede además entrar con Google para mostrar su foto (verificado ✓).</p>
       )}
-      <p className="muted">Se publican al instante. Puedes corregir el texto o las estrellas, ocultarlas o eliminarlas. Promedio publicado: <strong>{avg ? avg.toFixed(1) : '—'} ★</strong></p>
 
       <div className="reviews-admin">
         {list.map((r) => (
@@ -60,8 +57,8 @@ export default function ReviewsAdmin() {
             <div className="review-admin__head">
               {r.pictureUrl ? <img src={r.pictureUrl} alt="" referrerPolicy="no-referrer" /> : <span className="review-admin__letter">{r.name[0]}</span>}
               <div>
-                <strong>{r.name}</strong>
-                <small className="muted">{r.email ?? 'sin correo'} · {fmt.format(new Date(r.createdAt))} · {LANG_META[r.locale]?.short ?? r.locale}</small>
+                <strong>{r.name}{r.country && <span className="muted"> · {r.country}</span>}</strong>
+                <small className="muted">{r.source === 'google' ? `Google ✓ ${r.email ?? ''}` : 'Formulario web'} · {fmt.format(new Date(r.createdAt))} · {LANG_META[r.locale]?.short ?? r.locale}</small>
               </div>
               <span className="review-admin__stars">{'★'.repeat(r.rating)}<span className="muted">{'★'.repeat(5 - r.rating)}</span></span>
             </div>
@@ -70,11 +67,12 @@ export default function ReviewsAdmin() {
                 className="stack"
                 onSubmit={async (e) => {
                   e.preventDefault()
-                  if (await patch(r, { name: edit.name, rating: edit.rating, text: edit.text }, 'Reseña actualizada')) setEdit(null)
+                  if (await patch(r, { name: edit.name, country: edit.country, rating: edit.rating, text: edit.text }, 'Testimonio actualizado')) setEdit(null)
                 }}
               >
-                <div className="two-col">
-                  <input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} />
+                <div className="three-col">
+                  <input value={edit.name} placeholder="Nombre" onChange={(e) => setEdit({ ...edit, name: e.target.value })} />
+                  <input value={edit.country ?? ''} placeholder="País" onChange={(e) => setEdit({ ...edit, country: e.target.value || null })} />
                   <select value={edit.rating} onChange={(e) => setEdit({ ...edit, rating: Number(e.target.value) })}>
                     {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{'★'.repeat(n)}</option>)}
                   </select>
@@ -93,14 +91,14 @@ export default function ReviewsAdmin() {
               {!r.isVisible && <span className="pill pill--soft">Oculta</span>}
               <span style={{ flex: 1 }} />
               {edit?.id !== r.id && <button className="btn btn--sm" onClick={() => setEdit({ ...r })}>Editar</button>}
-              <button className="btn btn--sm" onClick={() => patch(r, { isVisible: !r.isVisible }, r.isVisible ? 'Reseña oculta' : 'Reseña publicada')}>
+              <button className="btn btn--sm" onClick={() => patch(r, { isVisible: !r.isVisible }, r.isVisible ? 'Testimonio oculto' : 'Testimonio publicado')}>
                 {r.isVisible ? 'Ocultar' : 'Publicar'}
               </button>
               <button className="btn btn--sm btn--danger-ghost" onClick={() => remove(r)}>Eliminar</button>
             </div>
           </div>
         ))}
-        {rows && !list.length && <p className="muted">No hay reseñas.</p>}
+        {rows && !list.length && <p className="muted">Aún no hay testimonios.</p>}
       </div>
     </>
   )

@@ -118,6 +118,8 @@ export interface InfoGroup { key: string; icon: string; title: Tr }
 export interface Review {
   id: number
   name: string
+  country: string | null
+  source: 'google' | 'web'
   email?: string | null
   pictureUrl: string | null
   rating: number

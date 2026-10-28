@@ -41,13 +41,13 @@ const es = {
   noSuggestions: 'Sin coincidencias. Prueba con otra palabra.',
   reviewsTitle: 'Opiniones de nuestros viajeros',
   reviewsCount: 'opiniones',
-  writeReview: 'Escribe tu reseña',
-  reviewIntro: 'Inicia sesión con Google para publicar tu opinión con tu nombre y foto.',
+  writeReview: 'Escribe tu testimonio',
+  reviewIntro: 'Opcional: continúa con Google para mostrar tu foto de perfil.',
   yourRating: 'Tu calificación',
   reviewPlaceholder: 'Cuéntanos cómo fue tu experiencia (mínimo 10 caracteres)',
-  publish: 'Publicar reseña',
+  publish: 'Publicar testimonio',
   publishing: 'Publicando…',
-  reviewThanks: '¡Gracias! Tu reseña ya está publicada.',
+  reviewThanks: '¡Gracias! Tu testimonio ya está publicado.',
   signedAs: 'Publicarás como',
   signOut: 'Cambiar cuenta',
   readMore: 'Leer más',
@@ -60,6 +60,9 @@ const es = {
   prev: 'Anterior',
   next: 'Siguiente',
   playVideo: 'Reproducir video',
+  yourName: 'Tu nombre',
+  yourCountry: 'País (opcional)',
+  orFillIn: 'o completa tus datos',
 }
 type Dict = typeof es
 export type DictKey = keyof Dict
@@ -96,8 +99,8 @@ const en: Dict = {
   noSuggestions: 'No matches. Try another word.',
   reviewsTitle: 'What our travelers say',
   reviewsCount: 'reviews',
-  writeReview: 'Write a review',
-  reviewIntro: 'Sign in with Google to post your review with your name and photo.',
+  writeReview: 'Share your experience',
+  reviewIntro: 'Optional: continue with Google to show your profile photo.',
   yourRating: 'Your rating',
   reviewPlaceholder: 'Tell us about your experience (at least 10 characters)',
   publish: 'Post review',
@@ -115,6 +118,9 @@ const en: Dict = {
   prev: 'Previous',
   next: 'Next',
   playVideo: 'Play video',
+  yourName: 'Your name',
+  yourCountry: 'Country (optional)',
+  orFillIn: 'or fill in your details',
 }
 
 const pt: Dict = {
@@ -149,8 +155,8 @@ const pt: Dict = {
   noSuggestions: 'Nada encontrado. Tente outra palavra.',
   reviewsTitle: 'Opiniões dos nossos viajantes',
   reviewsCount: 'avaliações',
-  writeReview: 'Escreva sua avaliação',
-  reviewIntro: 'Entre com o Google para publicar sua opinião com seu nome e foto.',
+  writeReview: 'Deixe seu depoimento',
+  reviewIntro: 'Opcional: continue com o Google para mostrar sua foto de perfil.',
   yourRating: 'Sua nota',
   reviewPlaceholder: 'Conte como foi sua experiência (mínimo 10 caracteres)',
   publish: 'Publicar avaliação',
@@ -168,6 +174,9 @@ const pt: Dict = {
   prev: 'Anterior',
   next: 'Próximo',
   playVideo: 'Reproduzir vídeo',
+  yourName: 'Seu nome',
+  yourCountry: 'País (opcional)',
+  orFillIn: 'ou preencha seus dados',
 }
 
 const zh: Dict = {
@@ -202,8 +211,8 @@ const zh: Dict = {
   noSuggestions: '没有匹配结果，请换个词试试。',
   reviewsTitle: '旅客评价',
   reviewsCount: '条评价',
-  writeReview: '写评价',
-  reviewIntro: '使用 Google 登录，以您的姓名和头像发布评价。',
+  writeReview: '分享您的体验',
+  reviewIntro: '可选：使用 Google 登录以显示您的头像。',
   yourRating: '您的评分',
   reviewPlaceholder: '请分享您的旅行体验（至少10个字符）',
   publish: '发布评价',
@@ -221,6 +230,9 @@ const zh: Dict = {
   prev: '上一页',
   next: '下一页',
   playVideo: '播放视频',
+  yourName: '您的姓名',
+  yourCountry: '国家（可选）',
+  orFillIn: '或填写您的信息',
 }
 
 const DICTS: Record<Lang, Dict> = { es, en, pt, zh }

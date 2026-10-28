@@ -28,7 +28,7 @@ export default function AdminLayout() {
           <NavLink to="/admin/faq">Preguntas frecuentes</NavLink>
           <NavLink to="/admin/paginas">Páginas "Info útil"</NavLink>
           <NavLink to="/admin/consultas">Consultas {nuevas > 0 && <span className="pill">{nuevas}</span>}</NavLink>
-          <NavLink to="/admin/resenas">Reseñas</NavLink>
+          <NavLink to="/admin/resenas">Testimonios</NavLink>
           <NavLink to="/admin/configuracion">Configuración del sitio</NavLink>
           <NavLink to="/admin/cuenta">Mi cuenta</NavLink>
         </nav>

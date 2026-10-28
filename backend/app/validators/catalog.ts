@@ -138,10 +138,13 @@ export const passwordValidator = vine.compile(
   })
 )
 
-/** Reseña pública: el token de Google identifica al autor */
+/** Testimonio público: con token de Google (nombre y foto de la cuenta) o con nombre escrito */
 export const reviewValidator = vine.compile(
   vine.object({
-    credential: vine.string().minLength(20),
+    credential: vine.string().minLength(20).optional(),
+    name: vine.string().trim().minLength(2).maxLength(80).optional(),
+    country: vine.string().trim().maxLength(60).optional().nullable(),
+    website: vine.string().optional().nullable(), // honeypot anti-spam
     rating: vine.number().min(1).max(5),
     text: vine.string().trim().minLength(10).maxLength(1500),
     locale: vine.enum(['es', 'en', 'pt', 'zh']).optional(),
@@ -152,6 +155,7 @@ export const reviewValidator = vine.compile(
 export const reviewAdminValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(2).maxLength(150).optional(),
+    country: vine.string().trim().maxLength(60).optional().nullable(),
     rating: vine.number().min(1).max(5).optional(),
     text: vine.string().trim().minLength(2).maxLength(3000).optional(),
     isVisible: vine.boolean().optional(),

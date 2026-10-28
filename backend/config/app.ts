@@ -17,6 +17,8 @@ export const appKey = new Secret(env.get('APP_KEY'))
  */
 export const http = defineConfig({
   generateRequestId: true,
+  /** Railway antepone su proxy: se confía en X-Forwarded-For para conocer la IP del visitante */
+  trustProxy: () => true,
   allowMethodSpoofing: false,
 
   /**

@@ -16,7 +16,6 @@ const SECTIONS = [
   ['bloques', '¿Por qué elegirnos?'],
   ['felices', 'Pasajeros felices'],
   ['videos', 'Videos'],
-  ['testimonios', 'Testimonios'],
   ['aliados', 'Certificaciones (PDF)'],
   ['infomenu', 'Menú Info útil'],
   ['chatbot', 'Asistente virtual'],
@@ -232,31 +231,6 @@ export default function SettingsAdmin() {
                 <div className="block-editor__head"><strong>Paso {i + 1}</strong><button type="button" className="icon-btn" onClick={() => removeArr('steps', i)}>✕</button></div>
                 <TrInput label="Título" value={st.title} onChange={(title) => setArr('steps', i, { title })} lang={lang} />
                 <TrInput label="Texto" value={st.text} onChange={(t) => setArr('steps', i, { text: t })} lang={lang} multiline rows={2} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {section === 'testimonios' && (
-        <div className="card settings-card">
-          {tabs}
-          <div className="admin-head">
-            <p className="muted">Publica solo opiniones reales de clientes, con su permiso. Cuando se active el inicio de sesión con Google, la portada muestra las reseñas de los visitantes (menú Reseñas) en lugar de estos testimonios.</p>
-            <button type="button" className="btn btn--sm" onClick={() => set({ testimonials: [...s.testimonials, { name: '', country: '', rating: 5, text: {} }] })}>+ Agregar</button>
-          </div>
-          <div className="blocks-grid">
-            {s.testimonials.map((r, i) => (
-              <div key={i} className="block-editor">
-                <div className="three-col">
-                  <input placeholder="Nombre" value={r.name} onChange={(e) => setArr('testimonials', i, { name: e.target.value })} />
-                  <input placeholder="País" value={r.country} onChange={(e) => setArr('testimonials', i, { country: e.target.value })} />
-                  <select value={r.rating ?? 5} onChange={(e) => setArr('testimonials', i, { rating: Number(e.target.value) })}>
-                    {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{'★'.repeat(n)}</option>)}
-                  </select>
-                </div>
-                <TrInput label="Opinión" value={r.text} onChange={(t) => setArr('testimonials', i, { text: t })} lang={lang} multiline rows={3} />
-                <button type="button" className="btn btn--sm btn--danger-ghost" onClick={() => removeArr('testimonials', i)}>Quitar</button>
               </div>
             ))}
           </div>

@@ -1,11 +1,15 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
-/** Reseña de un visitante que inició sesión con Google */
+/** Testimonio de un visitante (con cuenta de Google o desde el formulario simple) */
 export default class Review extends BaseModel {
   @column({ isPrimary: true }) declare id: number
-  @column({ serializeAs: null }) declare googleSub: string
+  @column({ serializeAs: null }) declare googleSub: string | null
   @column() declare name: string
+  @column() declare country: string | null
+  /** 'google' (inició sesión) o 'web' (formulario sin cuenta) */
+  @column() declare source: 'google' | 'web'
+  @column({ serializeAs: null }) declare ipHash: string | null
   @column({ serializeAs: null }) declare email: string | null
   @column() declare pictureUrl: string | null
   @column() declare rating: number

@@ -5,7 +5,7 @@ import TourCard from '../components/TourCard'
 import Img from '../components/Img'
 import InquiryForm from '../components/InquiryForm'
 import { IconStar } from '../components/Icons'
-import { FaqList, L, Stars, waLink } from '../components/common'
+import { FaqList, L, waLink } from '../components/common'
 import HeroSearch from '../components/HeroSearch'
 import HappyTravelers from '../components/home/HappyTravelers'
 import WhyUs from '../components/home/WhyUs'
@@ -145,22 +145,6 @@ export default function Home() {
       <ShortVideos />
 
       <Reviews />
-
-      {/* Testimonios cargados a mano: solo mientras no esté activo el sistema de reseñas con Google */}
-      {!!site?.testimonials.length && !site.googleClientId && (
-        <section className="section container">
-          <div className="section__head"><h2>{t('testimonials')}</h2></div>
-          <div className="testimonials">
-            {site.testimonials.map((r, i) => (
-              <figure key={i} className="testimonial">
-                <Stars value={r.rating ?? 5} />
-                <blockquote>“{tr(r.text)}”</blockquote>
-                <figcaption>{r.name} · {r.country}</figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
-      )}
 
       <section className="section section--tint" id="faq">
         <div className="container faq-contact">

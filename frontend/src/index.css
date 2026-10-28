@@ -645,3 +645,9 @@ body:has(.mobile-book) .bot-launcher, body:has(.mobile-book) .bot { bottom: 84px
 .pdf-frame { flex: 1; width: 100%; border: 0; min-height: 60vh; background: #525659; }
 .pdf-fallback { display: none; margin: 0; padding: 12px 16px; text-align: center; }
 @media (max-width: 760px) { .pdf-fallback { display: block; } }
+
+.review__country { font-weight: 400; color: var(--ink-2); }
+.review-form__google { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.review-form__or { display: flex; align-items: center; gap: 10px; width: 100%; color: var(--ink-2); font-size: 0.82rem; }
+.review-form__or::before, .review-form__or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; opacity: 0; }

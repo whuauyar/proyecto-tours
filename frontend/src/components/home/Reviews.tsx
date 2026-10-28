@@ -80,13 +80,13 @@ function ReviewCard({ r }: { r: Review }) {
       <header className="review__head">
         <Avatar name={r.name} src={r.pictureUrl} />
         <div>
-          <strong>{r.name}</strong>
+          <strong>{r.name}{r.country && <span className="review__country"> · {r.country}</span>}</strong>
           <small title={when.exact}><time dateTime={r.createdAt}>{when.relative} · {when.exact}</time></small>
         </div>
       </header>
       <div className="review__stars">
         <Stars value={r.rating} />
-        <span className="review__verified" title={t('verifiedGoogle')}><IconCheck /></span>
+        {r.source === 'google' && <span className="review__verified" title={t('verifiedGoogle')}><IconCheck /></span>}
       </div>
       <p className={`review__text ${open ? 'is-open' : ''}`}>{r.text}</p>
       {long && <button type="button" className="review__more" onClick={() => setOpen(!open)}>{open ? t('readLess') : t('readMore')}</button>}
@@ -94,11 +94,14 @@ function ReviewCard({ r }: { r: Review }) {
   )
 }
 
-/** Formulario: iniciar sesión con Google, elegir estrellas y escribir la reseña */
-function ReviewForm({ clientId, onDone, onClose }: { clientId: string; onDone: (r: Review) => void; onClose: () => void }) {
+/** Formulario del testimonio: nombre, país, estrellas y texto. Google es opcional (aporta nombre y foto). */
+function ReviewForm({ clientId, onDone, onClose }: { clientId?: string | null; onDone: (r: Review) => void; onClose: () => void }) {
   const { t, lang } = useI18n()
   const btn = useRef<HTMLDivElement>(null)
   const [credential, setCredential] = useState<string | null>(null)
+  const [name, setName] = useState('')
+  const [country, setCountry] = useState('')
+  const [website, setWebsite] = useState('') // honeypot
   const [rating, setRating] = useState(5)
   const [hover, setHover] = useState(0)
   const [text, setText] = useState('')
@@ -107,7 +110,7 @@ function ReviewForm({ clientId, onDone, onClose }: { clientId: string; onDone: (
   const profile = credential ? decodeProfile(credential) : null
 
   useEffect(() => {
-    if (credential) return
+    if (!clientId || credential) return
     let alive = true
     loadGsi()
       .then(() => {
@@ -115,21 +118,21 @@ function ReviewForm({ clientId, onDone, onClose }: { clientId: string; onDone: (
         window.google.accounts.id.initialize({ client_id: clientId, callback: (r) => setCredential(r.credential), locale: lang })
         window.google.accounts.id.renderButton(btn.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', locale: lang })
       })
-      .catch(() => alive && setError('No se pudo cargar el inicio de sesión de Google.'))
+      .catch(() => {}) // si Google no carga, queda el formulario simple
     return () => { alive = false }
   }, [clientId, credential, lang])
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!credential) return
     setBusy(true)
     setError(null)
     try {
-      const r = await api<Review>('/api/reviews', { method: 'POST', json: { credential, rating, text, locale: lang } })
-      onDone(r)
+      const json = credential
+        ? { credential, country, rating, text, locale: lang, website }
+        : { name, country, rating, text, locale: lang, website }
+      onDone(await api<Review>('/api/reviews', { method: 'POST', json }))
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('formError'))
-      // Token vencido: se pide volver a iniciar sesión
       if (err instanceof ApiError && err.status === 401) setCredential(null)
     } finally {
       setBusy(false)
@@ -138,45 +141,52 @@ function ReviewForm({ clientId, onDone, onClose }: { clientId: string; onDone: (
 
   return (
     <Modal title={t('writeReview')} onClose={onClose}>
-      {!credential ? (
-        <div className="review-form__login">
-          <p className="muted">{t('reviewIntro')}</p>
-          <div ref={btn} />
-          {error && <p className="alert alert--error">{error}</p>}
-        </div>
-      ) : (
-        <form className="form" onSubmit={submit}>
+      <form className="form" onSubmit={submit}>
+        {credential ? (
           <div className="review-form__who">
             <Avatar name={profile?.name ?? '?'} src={profile?.picture ?? null} />
             <span>{t('signedAs')} <strong>{profile?.name}</strong></span>
             <button type="button" className="link-btn" onClick={() => { window.google?.accounts.id.disableAutoSelect(); setCredential(null) }}>{t('signOut')}</button>
           </div>
-          <fieldset className="star-pick" onMouseLeave={() => setHover(0)}>
-            <legend>{t('yourRating')}</legend>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button
-                key={n}
-                type="button"
-                className={(hover || rating) >= n ? 'on' : ''}
-                onMouseEnter={() => setHover(n)}
-                onClick={() => setRating(n)}
-                aria-label={`${n} / 5`}
-                aria-pressed={rating === n}
-              >
-                <IconStar />
-              </button>
-            ))}
-          </fieldset>
-          <textarea rows={5} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('reviewPlaceholder')} minLength={10} maxLength={1500} required />
-          {error && <p className="alert alert--error">{error}</p>}
-          <button className="btn btn--primary" disabled={busy || text.trim().length < 10}>{busy ? t('publishing') : t('publish')}</button>
-        </form>
-      )}
+        ) : (
+          <>
+            {clientId && (
+              <div className="review-form__google">
+                <small className="muted">{t('reviewIntro')}</small>
+                <div ref={btn} />
+                <span className="review-form__or">{t('orFillIn')}</span>
+              </div>
+            )}
+            <label>{t('yourName')}<input value={name} onChange={(e) => setName(e.target.value)} minLength={2} maxLength={80} required autoComplete="name" /></label>
+          </>
+        )}
+        <label>{t('yourCountry')}<input value={country} onChange={(e) => setCountry(e.target.value)} maxLength={60} autoComplete="country-name" /></label>
+        <input className="hp" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} aria-hidden="true" />
+        <fieldset className="star-pick" onMouseLeave={() => setHover(0)}>
+          <legend>{t('yourRating')}</legend>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              className={(hover || rating) >= n ? 'on' : ''}
+              onMouseEnter={() => setHover(n)}
+              onClick={() => setRating(n)}
+              aria-label={`${n} / 5`}
+              aria-pressed={rating === n}
+            >
+              <IconStar />
+            </button>
+          ))}
+        </fieldset>
+        <textarea rows={5} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('reviewPlaceholder')} minLength={10} maxLength={1500} required />
+        {error && <p className="alert alert--error">{error}</p>}
+        <button className="btn btn--primary" disabled={busy || text.trim().length < 10 || (!credential && name.trim().length < 2)}>{busy ? t('publishing') : t('publish')}</button>
+      </form>
     </Modal>
   )
 }
 
-/** Reseñas de viajeros en carrusel (3 por página) + botón para escribir una */
+/** Testimonios de viajeros en carrusel (3 por página) + botón para que el visitante deje el suyo */
 export default function Reviews() {
   const { t } = useI18n()
   const { site } = useSite()
@@ -187,7 +197,7 @@ export default function Reviews() {
   const [writing, setWriting] = useState(false)
   const [thanks, setThanks] = useState(false)
   const clientId = site?.googleClientId
-  if (!data || (!items.length && !clientId)) return null
+  if (!data) return null
 
   const done = (r: Review) => {
     setData((d) => d && { ...d, items: [r, ...d.items], total: d.total + 1 })
@@ -200,12 +210,12 @@ export default function Reviews() {
     <section className="section container reviews" id="opiniones">
       <div className="section__head">
         <div>
-          <h2>{t('reviewsTitle')}</h2>
+          <h2>{t('testimonials')}</h2>
           {data.average !== null && (
             <p className="reviews__summary"><strong>{data.average.toFixed(1)}</strong> <Stars value={data.average} /> <span className="muted">{data.total} {t('reviewsCount')}</span></p>
           )}
         </div>
-        {clientId && <button type="button" className="btn btn--primary" onClick={() => { setThanks(false); setWriting(true) }}>{t('writeReview')}</button>}
+        <button type="button" className="btn btn--primary" onClick={() => { setThanks(false); setWriting(true) }}>{t('writeReview')}</button>
       </div>
       {thanks && <p className="alert alert--ok">{t('reviewThanks')}</p>}
       {items.length ? (
@@ -221,7 +231,7 @@ export default function Reviews() {
       ) : (
         <p className="muted">{t('noReviews')}</p>
       )}
-      {writing && clientId && <ReviewForm clientId={clientId} onDone={done} onClose={() => setWriting(false)} />}
+      {writing && <ReviewForm clientId={clientId} onDone={done} onClose={() => setWriting(false)} />}
     </section>
   )
 }

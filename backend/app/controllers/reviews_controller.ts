@@ -3,6 +3,11 @@ import { DateTime } from 'luxon'
 import Review from '#models/review'
 import { reviewAdminValidator, reviewValidator } from '#validators/catalog'
 import { verifyGoogleCredential } from '#services/google_identity'
+import { createHash } from 'node:crypto'
+import env from '#start/env'
+
+/** Huella anónima de la IP (no se guarda la IP) para limitar envíos repetidos */
+const ipHash = (ip: string) => createHash('sha256').update(`${ip}|${env.get('APP_KEY')}`).digest('hex')
 
 export default class ReviewsController {
   /** GET /api/reviews — reseñas visibles, las más recientes primero */
@@ -16,30 +21,42 @@ export default class ReviewsController {
     }
   }
 
-  /** POST /api/reviews — publica de inmediato (el administrador puede editar u ocultar) */
+  /**
+   * POST /api/reviews — se publica de inmediato (el administrador puede editar, ocultar o eliminar).
+   * Con `credential` (Google) se toman nombre y foto de la cuenta; sin él, el nombre escrito.
+   */
   async store({ request, response }: HttpContext) {
-    const { credential, rating, text, locale } = await request.validateUsing(reviewValidator)
-    let profile
-    try {
-      profile = await verifyGoogleCredential(credential)
-    } catch (error) {
-      return response.unauthorized({ message: (error as Error).message })
+    const { credential, name, country, website, rating, text, locale } = await request.validateUsing(reviewValidator)
+    if (website) return response.created({ ok: true }) // honeypot: bots
+
+    const hash = ipHash(request.ip())
+    const since = DateTime.now().minus({ hours: 1 }).toSQL()!
+    if (await Review.query().where('ip_hash', hash).where('created_at', '>', since).first()) {
+      return response.tooManyRequests({ message: 'Ya registraste un testimonio hace poco. ¡Gracias por tu opinión!' })
     }
 
-    // Anti-spam: una reseña por cuenta cada 24 horas
-    const recent = await Review.query()
-      .where('google_sub', profile.sub)
-      .where('created_at', '>', DateTime.now().minus({ hours: 24 }).toSQL()!)
-      .first()
-    if (recent) {
-      return response.tooManyRequests({ message: 'Ya registraste una reseña hoy. ¡Gracias por tu opinión!' })
+    let author: { googleSub: string | null; name: string; email: string | null; pictureUrl: string | null; source: 'google' | 'web' }
+    if (credential) {
+      try {
+        const p = await verifyGoogleCredential(credential)
+        author = { googleSub: p.sub, name: p.name, email: p.email, pictureUrl: p.picture, source: 'google' }
+      } catch (error) {
+        return response.unauthorized({ message: (error as Error).message })
+      }
+      const recent = await Review.query()
+        .where('google_sub', author.googleSub!)
+        .where('created_at', '>', DateTime.now().minus({ hours: 24 }).toSQL()!)
+        .first()
+      if (recent) return response.tooManyRequests({ message: 'Ya registraste un testimonio hoy. ¡Gracias por tu opinión!' })
+    } else {
+      if (!name) return response.unprocessableEntity({ errors: [{ field: 'name', message: 'Escribe tu nombre' }] })
+      author = { googleSub: null, name, email: null, pictureUrl: null, source: 'web' }
     }
 
     const review = await Review.create({
-      googleSub: profile.sub,
-      name: profile.name,
-      email: profile.email,
-      pictureUrl: profile.picture,
+      ...author,
+      country: country || null,
+      ipHash: hash,
       rating,
       text,
       locale: locale ?? 'es',
@@ -63,7 +80,8 @@ export default class ReviewsController {
     const contentChanged =
       (data.text !== undefined && data.text !== review.text) ||
       (data.rating !== undefined && data.rating !== review.rating) ||
-      (data.name !== undefined && data.name !== review.name)
+      (data.name !== undefined && data.name !== review.name) ||
+      (data.country !== undefined && data.country !== review.country)
     review.merge(data)
     if (contentChanged) review.editedByAdmin = true
     await review.save()
