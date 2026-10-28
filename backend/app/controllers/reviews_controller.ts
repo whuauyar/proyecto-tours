@@ -7,6 +7,9 @@ import { createHash } from 'node:crypto'
 import env from '#start/env'
 
 /** Huella anónima de la IP (no se guarda la IP) para limitar envíos repetidos */
+/** Máximo de testimonios por hora desde una misma conexión */
+const MAX_PER_HOUR = 5
+
 const ipHash = (ip: string) => createHash('sha256').update(`${ip}|${env.get('APP_KEY')}`).digest('hex')
 
 export default class ReviewsController {
@@ -29,10 +32,16 @@ export default class ReviewsController {
     const { credential, name, country, website, rating, text, locale } = await request.validateUsing(reviewValidator)
     if (website) return response.created({ ok: true }) // honeypot: bots
 
+    // Anti-spam: hasta 5 testimonios por hora desde la misma conexión (una familia o un hotel
+    // comparten IP) y nunca el mismo texto repetido
     const hash = ipHash(request.ip())
     const since = DateTime.now().minus({ hours: 1 }).toSQL()!
-    if (await Review.query().where('ip_hash', hash).where('created_at', '>', since).first()) {
-      return response.tooManyRequests({ message: 'Ya registraste un testimonio hace poco. ¡Gracias por tu opinión!' })
+    const recent = await Review.query().where('ip_hash', hash).where('created_at', '>', since).count('* as total').first()
+    if (Number(recent?.$extras.total ?? 0) >= MAX_PER_HOUR) {
+      return response.tooManyRequests({ message: 'Se recibieron varios testimonios desde esta conexión. Intenta de nuevo en una hora.' })
+    }
+    if (await Review.query().where('text', text).first()) {
+      return response.unprocessableEntity({ errors: [{ field: 'text', message: 'Ese testimonio ya fue publicado.' }] })
     }
 
     let author: { googleSub: string | null; name: string; email: string | null; pictureUrl: string | null; source: 'google' | 'web' }
