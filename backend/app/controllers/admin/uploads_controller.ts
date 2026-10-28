@@ -2,8 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { mediaUrl, storeImage, storeRaw } from '#services/media'
 
 const IMAGE_EXT = ['jpg', 'jpeg', 'png', 'webp', 'avif']
-/** Se guardan tal cual (sin convertir): videos y GIF animados */
-const RAW_EXT = ['mp4', 'webm', 'gif']
+/** Se guardan tal cual (sin convertir): videos, GIF animados y documentos PDF */
+const RAW_EXT = ['mp4', 'webm', 'gif', 'pdf']
 
 export default class UploadsController {
   /** POST /api/admin/uploads (multipart, campo "file") -> { key, url } */
@@ -18,6 +18,9 @@ export default class UploadsController {
     const ext = (file.extname ?? '').toLowerCase()
     if (IMAGE_EXT.includes(ext) && file.size > 12 * 1024 * 1024) {
       return response.unprocessableEntity({ errors: [{ message: 'Las imágenes pueden pesar hasta 12 MB' }] })
+    }
+    if (ext === 'pdf' && file.size > 20 * 1024 * 1024) {
+      return response.unprocessableEntity({ errors: [{ message: 'Los PDF pueden pesar hasta 20 MB' }] })
     }
     const folder = String(request.input('folder', 'uploads')).replace(/[^a-z0-9-]/gi, '') || 'uploads'
     const key = RAW_EXT.includes(ext) ? await storeRaw(file, folder, ext) : await storeImage(file, folder)

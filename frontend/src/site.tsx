@@ -25,6 +25,24 @@ export function SiteProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement.style
     if (site.primaryColor) root.setProperty('--primary', site.primaryColor)
     if (site.accentColor) root.setProperty('--accent', site.accentColor)
+    // Icono de la pestaña: el configurado en el panel (o el logo)
+    if (site.faviconUrl) {
+      let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+      if (!link) {
+        link = document.createElement('link')
+        link.rel = 'icon'
+        document.head.appendChild(link)
+      }
+      link.removeAttribute('type')
+      link.href = site.faviconUrl
+      let apple = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]')
+      if (!apple) {
+        apple = document.createElement('link')
+        apple.rel = 'apple-touch-icon'
+        document.head.appendChild(apple)
+      }
+      apple.href = site.faviconUrl
+    }
   }, [site])
   return <Ctx.Provider value={{ site, nav, reload: load }}>{children}</Ctx.Provider>
 }

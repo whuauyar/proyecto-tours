@@ -12,6 +12,7 @@ import FaqsAdmin from './FaqsAdmin'
 import PagesAdmin from './PagesAdmin'
 import SettingsAdmin from './SettingsAdmin'
 import InquiriesAdmin from './InquiriesAdmin'
+import ReviewsAdmin from './ReviewsAdmin'
 import Account from './Account'
 
 export default function AdminApp() {
@@ -30,6 +31,7 @@ export default function AdminApp() {
             <Route path="paginas" element={<PagesAdmin />} />
             <Route path="configuracion" element={<SettingsAdmin />} />
             <Route path="consultas" element={<InquiriesAdmin />} />
+            <Route path="resenas" element={<ReviewsAdmin />} />
             <Route path="cuenta" element={<Account />} />
           </Route>
         </Routes>

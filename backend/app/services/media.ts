@@ -47,7 +47,7 @@ export async function storeImage(file: MultipartFile, folder = 'uploads'): Promi
   return key
 }
 
-const RAW_TYPES: Record<string, string> = { mp4: 'video/mp4', webm: 'video/webm', gif: 'image/gif' }
+const RAW_TYPES: Record<string, string> = { mp4: 'video/mp4', webm: 'video/webm', gif: 'image/gif', pdf: 'application/pdf' }
 
 /** Guarda el archivo sin transformar (videos y GIF animados conservan su movimiento) */
 export async function storeRaw(file: MultipartFile, folder: string, ext: string): Promise<string> {

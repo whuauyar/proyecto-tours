@@ -45,8 +45,9 @@ Para priorizar otro destino en el futuro basta con cambiar el orden en el panel;
 - **Tours y precios**: precio adulto, oferta y niño editables directamente en la tabla; publicar/ocultar, destacar en portada; indicador de idiomas sin traducir.
 - **Formulario de tour** (pestañas ES / EN / PT / 中文, con el texto en español como referencia bajo cada campo y botón "copiar del español" para listas e itinerario): título, resumen, descripción, lo más destacado, itinerario por días, incluye / no incluye, qué llevar, FAQ propias del tour, destino, tipo, días/noches/horas, dificultad, compartido/privado, calificación y n.º de reseñas, imagen principal y galería.
 - **Destinos** y **Tipos de experiencia**: nombre, textos, imagen, orden, visibilidad, "mostrar en portada".
-- **Preguntas frecuentes** y **Páginas "Info útil"**: contenido en 4 idiomas.
-- **Configuración del sitio** (8 secciones): identidad, logo y colores de marca · idiomas activos e idioma por defecto · portada (imagen, video, títulos) · cifras de confianza y TripAdvisor · contacto, horario, mapa y redes · bloques "¿Por qué elegirnos?" y "Personaliza tu viaje" · testimonios con estrellas · logos de certificaciones.
+- **Preguntas frecuentes** y **Páginas "Info útil"**: contenido en 4 idiomas; cada página tiene grupo del mega-menú, subtítulo opcional (p. ej. "Enero - Febrero") y marca "Lo más destacado" (con imagen).
+- **Configuración del sitio**: identidad, logo, ícono de pestaña y colores · idiomas · portada (imagen, video, títulos) · cifras y TripAdvisor · contacto y mapa · redes sociales (4 principales + otras con ícono propio) · "¿Por qué elegirnos?" (pregunta de confianza + íconos propios o predefinidos) · "Pasajeros felices" (publicaciones de redes, premio y botón a "¿Por qué elegirnos?") · videos cortos (máx. 20, carrusel de 4) · testimonios · certificaciones con PDF (vista previa en el sitio) · grupos del menú "Info útil" · asistente virtual.
+- **Reseñas**: los visitantes inician sesión con Google y publican al instante (nombre, foto, estrellas, fecha y hora); el administrador puede corregir, ocultar o eliminar.
 - **Consultas**: bandeja con adultos/niños, idioma del visitante y estado.
 - **Mi cuenta**: cambio de contraseña.
 
@@ -141,11 +142,23 @@ copiar *Phone number ID* y generar token permanente (usuario de sistema en Busin
 Webhook: URL `https://<backend>/webhooks/whatsapp`, token de verificación = `WHATSAPP_VERIFY_TOKEN`,
 suscribir el campo `messages`.
 
+## Reseñas con Google (inicio de sesión)
+
+1. console.cloud.google.com → crea un proyecto → *APIs y servicios* → *Pantalla de consentimiento de OAuth* (tipo Externo, nombre de la agencia, correo de soporte) → publicar.
+2. *Credenciales* → *Crear credenciales* → *ID de cliente de OAuth* → tipo **Aplicación web** →
+   *Orígenes autorizados de JavaScript*: la URL del frontend (p. ej. `https://frontend-production-4fed.up.railway.app` y tu dominio propio).
+3. Copia el **ID de cliente** (`….apps.googleusercontent.com`) en la variable `GOOGLE_CLIENT_ID` del servicio `backend` y vuelve a desplegar.
+
+El ID de cliente es público por diseño (no es una clave secreta). Sin esa variable, el botón "Escribe tu reseña" no aparece.
+El servidor valida cada token con Google y comprueba que fue emitido para este ID; limita a una reseña por cuenta cada 24 h.
+
 ## API (resumen)
 
-Pública: `GET /api/settings`, `GET /api/navigation` (destinos, tipos, páginas), `GET /api/destinations/:slug`, `GET /api/tours?destination=&category=&duration=day|multi&sort=price_asc|price_desc|duration&featured=1&q=`, `GET /api/tours/:slug` (incluye relacionados), `GET /api/faqs`, `GET /api/pages/:slug`, `POST /api/inquiries`, `POST /api/auth/login`, `GET /media/*`.
+Pública: `GET /api/settings`, `GET /api/navigation` (destinos, tipos, páginas), `GET /api/destinations/:slug`, `GET /api/tours?destination=&category=&duration=day|multi&sort=price_asc|price_desc|duration&featured=1&q=`, `GET /api/tours/:slug` (incluye relacionados), `GET /api/faqs`, `GET /api/pages/:slug`, `POST /api/inquiries`, `GET|POST /api/reviews`, `POST /api/auth/login`, `GET /media/*`.
 
-Admin (Bearer token): `/api/admin/tours` (CRUD) + `PATCH /api/admin/tours/:id/quick` (precios/estado), CRUD de `/api/admin/destinations`, `/api/admin/categories`, `/api/admin/pages`, `/api/admin/faqs`, `POST /api/admin/uploads`, `GET|PUT /api/admin/settings`, `/api/admin/inquiries`, `PUT /api/admin/auth/password`.
+Admin (Bearer token): `/api/admin/tours` (CRUD) + `PATCH /api/admin/tours/:id/quick` (precios/estado), CRUD de `/api/admin/destinations`, `/api/admin/categories`, `/api/admin/pages`, `/api/admin/faqs`, `POST /api/admin/uploads`, `GET|PUT /api/admin/settings`, `/api/admin/inquiries`, `GET /api/admin/reviews` + `PATCH|DELETE /api/admin/reviews/:id`, `PUT /api/admin/auth/password`.
+
+Búsqueda (`q`): cada palabra debe aparecer al inicio de una palabra del título, resumen, ubicación, destino o tipo, sin importar tildes ni mayúsculas; los que coinciden en el título salen primero.
 
 ## Pendientes sugeridos
 

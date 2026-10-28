@@ -11,6 +11,7 @@ const TYPES: Record<string, string> = {
   svg: 'image/svg+xml',
   mp4: 'video/mp4',
   webm: 'video/webm',
+  pdf: 'application/pdf',
 }
 
 /** Sirve los archivos guardados (disco local o Railway Bucket privado) */
@@ -30,6 +31,8 @@ export default class MediaController {
 
     if (!(await disk.exists(key))) return response.notFound({ message: 'Archivo no encontrado' })
     response.header('Content-Type', TYPES[ext] ?? 'application/octet-stream')
+    // Los PDF se muestran dentro del sitio (vista previa), no se descargan
+    if (ext === 'pdf') response.header('Content-Disposition', 'inline')
     // Las keys son únicas (cuid), por eso se pueden cachear "para siempre"
     response.header('Cache-Control', 'public, max-age=31536000, immutable')
     return response.stream(await disk.getStream(key))

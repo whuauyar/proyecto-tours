@@ -12,6 +12,12 @@ export default class Page extends BaseModel {
   @column(jsonCol()) declare body: Tr
   @column() declare imageKey: string | null
   @column() declare showInMenu: boolean
+  /** Grupo del mega-menú "Info útil" (clave definida en Configuración → Menú Info útil) */
+  @column() declare menuGroup: string | null
+  /** Subtítulo dentro del grupo, p. ej. "Enero - Febrero" */
+  @column(jsonCol()) declare menuSubgroup: Tr
+  /** Aparece con imagen en la columna "Lo más destacado" */
+  @column() declare isHighlighted: boolean
   @column() declare sortOrder: number
   @column() declare isActive: boolean
 

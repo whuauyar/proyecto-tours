@@ -110,6 +110,59 @@ export function VideoInput({ url, onChange, folder = 'site' }: { url: string; on
   )
 }
 
+/* ---------- Carga de un archivo que no es imagen (video corto o PDF) ---------- */
+export function FileInput({ label, kind, value, url, onChange, folder, poster }: {
+  label: string
+  kind: 'video' | 'pdf'
+  value: string | null | undefined
+  url?: string | null
+  onChange: (key: string | null, url: string | null) => void
+  folder: string
+  poster?: string | null
+}) {
+  const ref = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+  const toast = useToast()
+  const limit = kind === 'pdf' ? 20 : 50
+  const pick = async (file?: File) => {
+    if (!file) return
+    if (file.size > limit * 1024 * 1024) return toast(`El archivo puede pesar hasta ${limit} MB`, 'error')
+    setBusy(true)
+    try {
+      const r = await uploadImage(file, folder)
+      onChange(r.key, r.url)
+    } catch (e) {
+      toast((e as Error).message, 'error')
+    } finally {
+      setBusy(false)
+      if (ref.current) ref.current.value = ''
+    }
+  }
+  return (
+    <div className="image-input">
+      <span className="field-label">{label}</span>
+      {kind === 'video' ? (
+        <div className="image-input__box" style={{ aspectRatio: '9/16', maxHeight: 260 }}>
+          {url && value ? <video src={url} poster={poster ?? undefined} controls preload="metadata" playsInline /> : <span className="muted">MP4 o WebM, vertical, hasta 50 MB</span>}
+          {busy && <div className="image-input__busy">Subiendo…</div>}
+        </div>
+      ) : (
+        <div className="file-chip">
+          {url && value ? <a href={url} target="_blank" rel="noreferrer">📄 Ver PDF adjunto</a> : <span className="muted">Sin documento</span>}
+          {busy && <span className="muted"> · Subiendo…</span>}
+        </div>
+      )}
+      <div className="image-input__actions">
+        <button type="button" className="btn btn--sm" onClick={() => ref.current?.click()} disabled={busy}>
+          {value ? 'Cambiar' : kind === 'pdf' ? 'Adjuntar PDF' : 'Subir video'}
+        </button>
+        {value && <button type="button" className="btn btn--sm btn--danger-ghost" onClick={() => onChange(null, null)}>Quitar</button>}
+      </div>
+      <input ref={ref} type="file" accept={kind === 'pdf' ? 'application/pdf' : 'video/mp4,video/webm'} hidden onChange={(e) => pick(e.target.files?.[0])} />
+    </div>
+  )
+}
+
 /* ---------- Editor de listas de texto (incluye / no incluye) ---------- */
 export function ListEditor({ value, onChange, placeholder }: { value: string[]; onChange: (v: string[]) => void; placeholder?: string }) {
   return (

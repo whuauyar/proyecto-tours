@@ -46,6 +46,9 @@ export const pageValidator = vine.compile(
     summary: tr().optional(),
     body: tr().optional(),
     showInMenu: vine.boolean().optional(),
+    menuGroup: vine.string().trim().maxLength(40).optional().nullable(),
+    menuSubgroup: tr().optional(),
+    isHighlighted: vine.boolean().optional(),
   })
 )
 
@@ -132,5 +135,25 @@ export const passwordValidator = vine.compile(
   vine.object({
     currentPassword: vine.string(),
     newPassword: vine.string().minLength(8).confirmed({ confirmationField: 'confirmPassword' }),
+  })
+)
+
+/** Reseña pública: el token de Google identifica al autor */
+export const reviewValidator = vine.compile(
+  vine.object({
+    credential: vine.string().minLength(20),
+    rating: vine.number().min(1).max(5),
+    text: vine.string().trim().minLength(10).maxLength(1500),
+    locale: vine.enum(['es', 'en', 'pt', 'zh']).optional(),
+  })
+)
+
+/** Edición de una reseña desde el panel */
+export const reviewAdminValidator = vine.compile(
+  vine.object({
+    name: vine.string().trim().minLength(2).maxLength(150).optional(),
+    rating: vine.number().min(1).max(5).optional(),
+    text: vine.string().trim().minLength(2).maxLength(3000).optional(),
+    isVisible: vine.boolean().optional(),
   })
 )

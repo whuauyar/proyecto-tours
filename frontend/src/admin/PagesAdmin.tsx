@@ -40,9 +40,9 @@ export default function PagesAdmin() {
     <>
       <div className="admin-head">
         <h1>Páginas "Info útil"</h1>
-        <button className="btn btn--primary" onClick={() => { setDraft({ title: {}, summary: {}, body: {}, imageKey: null, showInMenu: true, sortOrder: rows?.length ?? 0, isActive: true }); setLang('es') }}>+ Nueva página</button>
+        <button className="btn btn--primary" onClick={() => { setDraft({ title: {}, summary: {}, body: {}, imageKey: null, showInMenu: true, menuGroup: site?.infoGroups[0]?.key ?? null, menuSubgroup: {}, isHighlighted: false, sortOrder: rows?.length ?? 0, isActive: true }); setLang('es') }}>+ Nueva página</button>
       </div>
-      <p className="muted">Clima, boletos, transporte, términos y condiciones… Las marcadas "en menú" aparecen en el menú Info útil y en el pie de página.</p>
+      <p className="muted">Clima, boletos, transporte, festividades… Las marcadas "en menú" aparecen en el menú Info útil dentro de su grupo. Los grupos (título e ícono) se editan en Configuración → Menú Info útil.</p>
       {draft && (
         <form className="card cat-form" onSubmit={save}>
           <LangTabs lang={lang} onChange={setLang} missing={missingLangs([draft.title, draft.summary, draft.body])} enabled={site?.languages} />
@@ -53,7 +53,15 @@ export default function PagesAdmin() {
               <TrInput label="Contenido" value={draft.body} onChange={(body) => set({ body })} lang={lang} multiline rows={12} hint="Separa párrafos con una línea en blanco" />
             </div>
             <div>
-              <ImageInput label="Imagen (opcional)" folder="pages" value={draft.imageKey} url={draft.imageUrl} onChange={(imageKey, imageUrl) => set({ imageKey, imageUrl })} aspect="21/9" />
+              <ImageInput label="Imagen (obligatoria si es destacada)" folder="pages" value={draft.imageKey} url={draft.imageUrl} onChange={(imageKey, imageUrl) => set({ imageKey, imageUrl })} aspect="21/9" />
+              <Field label="Grupo en el menú Info útil">
+                <select value={draft.menuGroup ?? ''} onChange={(e) => set({ menuGroup: e.target.value || null })}>
+                  <option value="">Sin grupo (lista general)</option>
+                  {site?.infoGroups.map((g) => <option key={g.key} value={g.key}>{trValue(g.title, 'es')}</option>)}
+                </select>
+              </Field>
+              <TrInput label="Subtítulo dentro del grupo (opcional)" value={draft.menuSubgroup} onChange={(menuSubgroup) => set({ menuSubgroup })} lang={lang} hint='Ej.: "Enero - Febrero". Las páginas seguidas con el mismo subtítulo se agrupan.' />
+              <label className="check"><input type="checkbox" checked={draft.isHighlighted} onChange={(e) => set({ isHighlighted: e.target.checked })} /> Mostrar en "Lo más destacado" (con imagen, máx. 4)</label>
               <Field label="URL (slug)" hint="Se genera del título si lo dejas vacío"><input value={draft.slug ?? ''} onChange={(e) => set({ slug: e.target.value })} /></Field>
               <Field label="Orden"><input type="number" value={draft.sortOrder} onChange={(e) => set({ sortOrder: Number(e.target.value) })} /></Field>
               <label className="check"><input type="checkbox" checked={draft.showInMenu} onChange={(e) => set({ showInMenu: e.target.checked })} /> Mostrar en el menú</label>
@@ -68,16 +76,21 @@ export default function PagesAdmin() {
       )}
       <div className="card table-wrap">
         <table className="table">
-          <thead><tr><th>Página</th><th>URL</th><th>Menú</th><th>Traducción</th><th></th></tr></thead>
+          <thead><tr><th>Página</th><th>Grupo</th><th>URL</th><th>Menú</th><th>Traducción</th><th></th></tr></thead>
           <tbody>
             {rows?.map((p) => (
               <tr key={p.id} className={p.isActive ? '' : 'is-muted'}>
                 <td data-label="Página"><strong>{trValue(p.title, 'es')}</strong></td>
+                <td data-label="Grupo" className="small">
+                  {trValue(site?.infoGroups.find((g) => g.key === p.menuGroup)?.title, 'es') ?? <span className="muted">—</span>}
+                  {trValue(p.menuSubgroup, 'es') && <span className="muted"> · {trValue(p.menuSubgroup, 'es')}</span>}
+                  {p.isHighlighted && <span className="pill pill--soft">Destacada</span>}
+                </td>
                 <td data-label="URL" className="muted small">/info/{p.slug}</td>
                 <td data-label="Menú">{p.showInMenu ? 'Sí' : 'No'}</td>
                 <td data-label="Traducción"><MissingBadges values={[p.title, p.body]} /></td>
                 <td className="nowrap">
-                  <button className="btn btn--sm" onClick={() => { setDraft({ ...p }); setLang('es') }}>Editar</button>{' '}
+                  <button className="btn btn--sm" onClick={() => { setDraft({ ...p }); setLang('es'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Editar</button>{' '}
                   <button className="btn btn--sm btn--danger-ghost" onClick={() => remove(p)}>Eliminar</button>
                 </td>
               </tr>

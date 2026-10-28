@@ -26,6 +26,9 @@ export default function Tours() {
     const p = new URLSearchParams(params)
     if (v) p.set(k, v)
     else p.delete(k)
+    // Al elegir cualquier filtro de las listas se limpia la caja de texto,
+    // para que la búsqueda escrita no oculte resultados del nuevo filtro
+    if (k !== 'q') p.delete('q')
     setParams(p, { replace: true })
   }
   const destName = tr(nav.destinations.find((d) => d.slug === dest)?.name)

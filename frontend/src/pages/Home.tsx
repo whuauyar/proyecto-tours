@@ -1,27 +1,21 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useI18n } from '../i18n'
 import { useFetch, useSite } from '../site'
 import type { Faq, Tour } from '../types'
 import TourCard from '../components/TourCard'
 import Img from '../components/Img'
 import InquiryForm from '../components/InquiryForm'
-import { FEATURE_ICONS, IconSearch, IconStar, IconUsers } from '../components/Icons'
+import { IconStar } from '../components/Icons'
 import { FaqList, L, Stars, waLink } from '../components/common'
+import HeroSearch from '../components/HeroSearch'
+import HappyTravelers from '../components/home/HappyTravelers'
+import WhyUs from '../components/home/WhyUs'
+import ShortVideos from '../components/home/ShortVideos'
+import Reviews from '../components/home/Reviews'
+import Certifications from '../components/home/Certifications'
 
 function Hero() {
-  const { t, tr, path } = useI18n()
-  const { site, nav } = useSite()
-  const navigate = useNavigate()
-  const [q, setQ] = useState('')
-  const [dest, setDest] = useState('')
-  const search = (e: FormEvent) => {
-    e.preventDefault()
-    const p = new URLSearchParams()
-    if (q) p.set('q', q)
-    if (dest) p.set('destino', dest)
-    navigate(`${path('/tours')}?${p}`)
-  }
+  const { tr } = useI18n()
+  const { site } = useSite()
   // Respeta "reducir movimiento" y el modo de ahorro de datos: en esos casos solo imagen
   const calm = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData)
@@ -38,15 +32,7 @@ function Hero() {
         <p className="eyebrow">{tr(site?.tagline)}</p>
         <h1>{tr(site?.heroTitle)}</h1>
         <p className="hero__lead">{tr(site?.heroSubtitle)}</p>
-        <form className="hero__search" onSubmit={search}>
-          <IconSearch />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('search')} aria-label={t('search')} />
-          <select value={dest} onChange={(e) => setDest(e.target.value)} aria-label={t('destinations')}>
-            <option value="">{t('anyDestination')}</option>
-            {nav.destinations.map((d) => <option key={d.id} value={d.slug}>{tr(d.name)}</option>)}
-          </select>
-          <button className="btn btn--primary">{t('searchBtn')}</button>
-        </form>
+        <HeroSearch />
       </div>
     </section>
   )
@@ -102,6 +88,8 @@ export default function Home() {
 
       <PrimaryDestination />
 
+      <HappyTravelers />
+
       <section className="section section--tint">
         <div className="container">
         <div className="section__head"><h2>{t('exploreDest')}</h2><L to="/tours" className="link-arrow">{t('allTours')} →</L></div>
@@ -152,30 +140,14 @@ export default function Home() {
         </section>
       )}
 
-      {!!site?.features.length && (
-        <section className="section section--dark">
-          <div className="container">
-            <div className="section__head section__head--center">
-              <h2>{t('whyUs')}</h2>
-              <p>{tr(site.about)}</p>
-            </div>
-            <div className="features">
-              {site.features.map((f, i) => {
-                const Icon = FEATURE_ICONS[f.icon] ?? IconUsers
-                return (
-                  <div key={i} className="feature">
-                    <Icon />
-                    <h3>{tr(f.title)}</h3>
-                    <p>{tr(f.text)}</p>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </section>
-      )}
+      <WhyUs />
 
-      {!!site?.testimonials.length && (
+      <ShortVideos />
+
+      <Reviews />
+
+      {/* Testimonios cargados a mano: solo mientras no esté activo el sistema de reseñas con Google */}
+      {!!site?.testimonials.length && !site.googleClientId && (
         <section className="section container">
           <div className="section__head"><h2>{t('testimonials')}</h2></div>
           <div className="testimonials">
@@ -203,19 +175,7 @@ export default function Home() {
         </div>
       </section>
 
-      {!!site?.partners.length && (
-        <section className="section container partners">
-          <h2 className="partners__title">{t('partners')}</h2>
-          <div className="partners__row">
-            {site.partners.map((p, i) => {
-              const img = p.imageUrl ? <img src={p.imageUrl} alt={p.name} loading="lazy" /> : <span>{p.name}</span>
-              return p.url
-                ? <a key={i} href={p.url} target="_blank" rel="noreferrer" title={p.name}>{img}</a>
-                : <div key={i} title={p.name}>{img}</div>
-            })}
-          </div>
-        </section>
-      )}
+      <Certifications />
     </>
   )
 }

@@ -18,6 +18,7 @@ const FaqsController = () => import('#controllers/admin/faqs_controller')
 const ToursController = () => import('#controllers/admin/tours_controller')
 const SettingsController = () => import('#controllers/admin/settings_controller')
 const InquiriesController = () => import('#controllers/admin/inquiries_controller')
+const ReviewsController = () => import('#controllers/reviews_controller')
 
 router.get('/', async () => ({ name: 'tours-api', status: 'ok' }))
 router.get('/health', async () => ({ status: 'ok' }))
@@ -38,6 +39,8 @@ router
     router.get('tours', [PublicController, 'tours'])
     router.get('tours/:slug', [PublicController, 'tour'])
     router.post('inquiries', [PublicController, 'storeInquiry'])
+    router.get('reviews', [ReviewsController, 'index'])
+    router.post('reviews', [ReviewsController, 'store'])
     router.post('auth/login', [AuthController, 'login'])
   })
   .prefix('/api')
@@ -60,6 +63,10 @@ router
 
     router.get('settings', [SettingsController, 'show'])
     router.put('settings', [SettingsController, 'update'])
+
+    router.get('reviews', [ReviewsController, 'adminIndex'])
+    router.patch('reviews/:id', [ReviewsController, 'update'])
+    router.delete('reviews/:id', [ReviewsController, 'destroy'])
 
     router.get('inquiries/stats', [InquiriesController, 'stats'])
     router.get('inquiries', [InquiriesController, 'index'])

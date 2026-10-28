@@ -47,6 +47,8 @@ export default await Env.create(new URL('../', import.meta.url), {
   WHATSAPP_API_BASE: Env.schema.string.optional(),
   /** URL pública del sitio (frontend), para los enlaces que envía el bot */
   SITE_URL: Env.schema.string.optional(),
+  /** Inicio de sesión con Google para dejar reseñas (Client ID de Google Cloud) */
+  GOOGLE_CLIENT_ID: Env.schema.string.optional(),
   /** Crear tours/categorías de ejemplo si la base está vacía (default: true) */
   SEED_DEMO: Env.schema.boolean.optional(),
 })

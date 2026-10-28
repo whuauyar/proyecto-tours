@@ -10,6 +10,8 @@ import Page from '#models/page'
 import { saveSite } from '#services/site_settings'
 import { sceneryImage } from '#services/demo_scenery'
 import type { Tr } from '#services/i18n'
+import { seedInfoPages } from '#services/info_pages_seed'
+import { cuid } from '@adonisjs/core/helpers'
 
 /** Atajo para textos en 4 idiomas: es, en, pt, zh */
 const t = (es: string, en: string, pt: string, zh: string): Tr => ({ es, en, pt, zh })
@@ -51,7 +53,15 @@ export default class MainSeeder extends BaseSeeder {
       console.log(`Administrador: ${email}`)
     }
     if (env.get('SEED_DEMO', true) === false) return console.log('SEED_DEMO=false: sin datos de ejemplo')
-    if (await Tour.query().first()) return console.log('Ya existen tours: se omiten los datos de ejemplo')
+    if (await Tour.query().first()) {
+      console.log('Ya existen tours: se omiten los datos de ejemplo')
+      // Contenido nuevo del menú "Info útil" (una sola vez; nombres únicos para no pisar imágenes)
+      return seedInfoPages(async (folder) => {
+        const key = `${folder}/demo/${cuid()}.webp`
+        await drive.use().put(key, await sceneryImage(Math.floor(Math.random() * 6)), { contentType: 'image/webp' })
+        return key
+      })
+    }
 
     /* ---------- Configuración del sitio ---------- */
     await saveSite({
@@ -273,6 +283,7 @@ export default class MainSeeder extends BaseSeeder {
       await Page.create({ slug, title, summary: {}, body, showInMenu: menu, sortOrder: i, isActive: true, imageKey: menu ? await demoImage('pages') : null })
     }
 
+    await seedInfoPages(demoImage)
     console.log(`Datos de ejemplo: ${destData.length} destinos, ${catData.length} tipos, ${tours.length} tours, ${faqs.length} FAQ, ${pages.length} páginas`)
   }
 }

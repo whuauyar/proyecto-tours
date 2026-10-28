@@ -40,6 +40,9 @@ export interface PageItem {
   imageKey: string | null
   imageUrl?: string | null
   showInMenu: boolean
+  menuGroup: string | null
+  menuSubgroup: Tr
+  isHighlighted: boolean
   sortOrder: number
   isActive: boolean
 }
@@ -103,10 +106,27 @@ export interface Tour {
   related?: Tour[]
 }
 
-export interface Feature { icon: string; title: Tr; text: Tr }
+export interface Feature { icon: string; imageKey?: string | null; imageUrl?: string | null; title: Tr; text: Tr }
 export interface Step { title: Tr; text: Tr }
 export interface Testimonial { name: string; country: string; rating: number; text: Tr }
-export interface Partner { name: string; imageKey: string | null; imageUrl?: string | null; url: string }
+export interface Partner { name: string; imageKey: string | null; imageUrl?: string | null; url: string; pdfKey?: string | null; pdfUrl?: string | null }
+export interface ExtraSocial { name: string; url: string; imageKey: string | null; imageUrl?: string | null }
+export interface SocialPost { imageKey: string | null; imageUrl?: string | null; network: string; account: string; caption: Tr; url: string }
+export interface ShortVideo { videoKey: string | null; videoUrl?: string | null; posterKey: string | null; posterUrl?: string | null; title: Tr }
+export interface InfoGroup { key: string; icon: string; title: Tr }
+
+export interface Review {
+  id: number
+  name: string
+  email?: string | null
+  pictureUrl: string | null
+  rating: number
+  text: string
+  locale: Lang
+  isVisible: boolean
+  editedByAdmin: boolean
+  createdAt: string
+}
 
 export interface SiteSettings {
   name: string
@@ -114,6 +134,8 @@ export interface SiteSettings {
   ruc: string
   logoKey: string | null
   logoUrl?: string | null
+  faviconKey: string | null
+  faviconUrl?: string | null
   primaryColor: string
   accentColor: string
   languages: Lang[]
@@ -141,6 +163,23 @@ export interface SiteSettings {
   instagram: string
   youtube: string
   tiktok: string
+  extraSocials: ExtraSocial[]
+  trustTitle: Tr
+  trustText: Tr
+  whyTitle: Tr
+  happyEyebrow: Tr
+  happyTitle: Tr
+  happyText: Tr
+  awardImageKey: string | null
+  awardImageUrl?: string | null
+  awardTitle: Tr
+  awardText: Tr
+  awardUrl: string
+  socialPosts: SocialPost[]
+  videosTitle: Tr
+  videos: ShortVideo[]
+  infoGroups: InfoGroup[]
+  googleClientId?: string | null
   features: Feature[]
   steps: Step[]
   testimonials: Testimonial[]
@@ -153,7 +192,7 @@ export interface SiteSettings {
 export interface Navigation {
   destinations: Destination[]
   categories: Category[]
-  pages: Pick<PageItem, 'id' | 'slug' | 'title'>[]
+  pages: Pick<PageItem, 'id' | 'slug' | 'title' | 'imageUrl' | 'menuGroup' | 'menuSubgroup' | 'isHighlighted'>[]
 }
 
 export interface Inquiry {

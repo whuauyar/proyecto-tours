@@ -3,26 +3,37 @@ import { api } from '../api'
 import { LANG_META } from '../i18n'
 import { useSite } from '../site'
 import { LANGS, type Lang, type SiteSettings, type Tr } from '../types'
-import { FEATURE_ICONS } from '../components/Icons'
-import { Field, ImageInput, LangTabs, TrInput, VideoInput, missingLangs, useToast } from './ui'
+import { FEATURE_ICONS, INFO_ICONS } from '../components/Icons'
+import { Field, FileInput, ImageInput, LangTabs, TrInput, VideoInput, missingLangs, useToast } from './ui'
 
 const SECTIONS = [
   ['general', 'Identidad y colores'],
   ['idiomas', 'Idiomas'],
   ['portada', 'Portada'],
   ['confianza', 'Confianza y cifras'],
-  ['contacto', 'Contacto y redes'],
-  ['bloques', 'Bloques de portada'],
+  ['contacto', 'Contacto'],
+  ['redes', 'Redes sociales'],
+  ['bloques', '¿Por qué elegirnos?'],
+  ['felices', 'Pasajeros felices'],
+  ['videos', 'Videos'],
   ['testimonios', 'Testimonios'],
-  ['aliados', 'Certificaciones'],
+  ['aliados', 'Certificaciones (PDF)'],
+  ['infomenu', 'Menú Info útil'],
   ['chatbot', 'Asistente virtual'],
 ] as const
 type Section = (typeof SECTIONS)[number][0]
 
 const ICON_LABELS: Record<string, string> = {
+  handshake: 'Apretón de manos', award: 'Medalla', smile: 'Satisfacción', users: 'Comunidad',
   guide: 'Guía', price: 'Precio', support: 'Soporte', shield: 'Seguridad', leaf: 'Sostenible',
-  calendar: 'Calendario', star: 'Estrella', heart: 'Corazón', users: 'Grupo', globe: 'Mundo',
+  calendar: 'Calendario', star: 'Estrella', heart: 'Corazón', globe: 'Mundo',
 }
+const INFO_ICON_LABELS: Record<string, string> = {
+  info: 'Información', cloud: 'Clima', ticket: 'Boleto', plane: 'Avión', firstaid: 'Emergencia',
+  calendar: 'Calendario', pin: 'Ubicación', mountain: 'Montaña', star: 'Estrella', file: 'Documento',
+}
+const NETWORKS = ['instagram', 'facebook', 'tiktok', 'youtube']
+type ListKey = 'features' | 'steps' | 'testimonials' | 'partners' | 'extraSocials' | 'socialPosts' | 'videos' | 'infoGroups'
 
 export default function SettingsAdmin() {
   const [s, setS] = useState<SiteSettings | null>(null)
@@ -40,23 +51,35 @@ export default function SettingsAdmin() {
       <input type={type} value={(s[k] as string | number) ?? ''} onChange={(e) => set({ [k]: type === 'number' ? Number(e.target.value) : e.target.value } as never)} />
     </Field>
   )
-  const setArr = <K extends 'features' | 'steps' | 'testimonials' | 'partners'>(k: K, i: number, patch: Partial<SiteSettings[K][number]>) =>
+  const setArr = <K extends ListKey>(k: K, i: number, patch: Partial<SiteSettings[K][number]>) =>
     set({ [k]: (s[k] as unknown[]).map((x, j) => (j === i ? { ...(x as object), ...patch } : x)) } as never)
-  const removeArr = (k: 'features' | 'steps' | 'testimonials' | 'partners', i: number) => set({ [k]: (s[k] as unknown[]).filter((_, j) => j !== i) } as never)
+  const removeArr = (k: ListKey, i: number) => set({ [k]: (s[k] as unknown[]).filter((_, j) => j !== i) } as never)
+  const moveArr = (k: ListKey, i: number, dir: -1 | 1) => {
+    const list = [...(s[k] as unknown[])]
+    const j = i + dir
+    if (j < 0 || j >= list.length) return
+    ;[list[i], list[j]] = [list[j], list[i]]
+    set({ [k]: list } as never)
+  }
+  const moveBtns = (k: ListKey, i: number) => (
+    <>
+      <button type="button" className="icon-btn" title="Mover antes" onClick={() => moveArr(k, i, -1)}>↑</button>
+      <button type="button" className="icon-btn" title="Mover después" onClick={() => moveArr(k, i, 1)}>↓</button>
+    </>
+  )
 
   const allTr: Array<Tr | undefined> = [s.tagline, s.heroTitle, s.heroSubtitle, s.about, s.officeHours,
-    s.chatbotGreeting, ...s.features.flatMap((f) => [f.title, f.text]), ...s.steps.flatMap((x) => [x.title, x.text]), ...s.testimonials.map((x) => x.text)]
+    s.chatbotGreeting, s.trustTitle, s.trustText, s.whyTitle, s.happyEyebrow, s.happyTitle, s.happyText, s.awardTitle, s.awardText, s.videosTitle,
+    ...s.features.flatMap((f) => [f.title, f.text]), ...s.steps.flatMap((x) => [x.title, x.text]), ...s.testimonials.map((x) => x.text),
+    ...s.socialPosts.map((x) => x.caption), ...s.videos.map((v) => v.title), ...s.infoGroups.map((g) => g.title)]
   const tabs = <LangTabs lang={lang} onChange={setLang} missing={missingLangs(allTr)} enabled={s.languages} />
 
   const save = async (e: FormEvent) => {
     e.preventDefault()
     setSaving(true)
     try {
-      const { logoUrl: _l, heroImageUrl: _h, ...body } = s
-      setS(await api<SiteSettings>('/api/admin/settings', {
-        method: 'PUT',
-        json: { ...body, partners: body.partners.map(({ imageUrl: _u, ...p }) => p) },
-      }))
+      // El servidor ignora las URLs calculadas y guarda solo los campos conocidos
+      setS(await api<SiteSettings>('/api/admin/settings', { method: 'PUT', json: s }))
       reload()
       toast('Configuración guardada')
     } catch (err) {
@@ -90,7 +113,11 @@ export default function SettingsAdmin() {
                 <Field label="Color secundario"><div className="color-row"><input type="color" value={s.accentColor} onChange={(e) => set({ accentColor: e.target.value })} /><code>{s.accentColor}</code></div></Field>
               </div>
             </div>
-            <ImageInput label="Logo (PNG/SVG con fondo transparente)" folder="site" value={s.logoKey} url={s.logoUrl} aspect="3/1" onChange={(logoKey, logoUrl) => set({ logoKey, logoUrl })} />
+            <div className="stack">
+              <ImageInput label="Logo (PNG/SVG con fondo transparente)" folder="site" value={s.logoKey} url={s.logoUrl} aspect="3/1" onChange={(logoKey, logoUrl) => set({ logoKey, logoUrl })} />
+              <ImageInput label="Ícono de la pestaña del navegador (cuadrado, 512×512 px)" folder="site" value={s.faviconKey} url={s.faviconKey ? s.faviconUrl : null} aspect="1/1" onChange={(faviconKey, faviconUrl) => set({ faviconKey, faviconUrl })} />
+              <small className="muted">Si no subes un ícono, la pestaña muestra el logo.</small>
+            </div>
           </div>
         </div>
       )}
@@ -157,11 +184,8 @@ export default function SettingsAdmin() {
               <TrInput label="Horario de atención" value={s.officeHours} onChange={(officeHours) => set({ officeHours })} lang={lang} />
             </div>
             <div>
-              {text('facebook', 'Facebook (URL)')}
-              {text('instagram', 'Instagram (URL)')}
-              {text('youtube', 'YouTube (URL)')}
-              {text('tiktok', 'TikTok (URL)')}
               {text('mapUrl', 'Mapa (URL de inserción de Google Maps)', 'Google Maps → Compartir → Insertar un mapa → copia solo el valor de src="…"')}
+              <p className="muted small">Las redes sociales se configuran en la pestaña "Redes sociales".</p>
             </div>
           </div>
         </div>
@@ -170,8 +194,12 @@ export default function SettingsAdmin() {
       {section === 'bloques' && (
         <div className="card settings-card">
           {tabs}
+          <p className="muted">Sección de la portada con la pregunta de confianza y la franja de íconos. El botón "¿Por qué elegirnos?" de "Pasajeros felices" lleva aquí.</p>
+          <TrInput label="Pregunta de confianza (título)" value={s.trustTitle} onChange={(trustTitle) => set({ trustTitle })} lang={lang} hint="Déjalo vacío para ocultar este bloque" />
+          <TrInput label="Texto de confianza" value={s.trustText} onChange={(trustText) => set({ trustText })} lang={lang} multiline rows={3} />
+          <TrInput label="Título de la franja" value={s.whyTitle} onChange={(whyTitle) => set({ whyTitle })} lang={lang} />
           <div className="admin-head">
-            <h2>¿Por qué elegirnos? ({s.features.length})</h2>
+            <h2>Íconos ({s.features.length})</h2>
             <button type="button" className="btn btn--sm" onClick={() => set({ features: [...s.features, { icon: 'star', title: {}, text: {} }] })}>+ Agregar</button>
           </div>
           <div className="blocks-grid">
@@ -180,12 +208,14 @@ export default function SettingsAdmin() {
               return (
                 <div key={i} className="block-editor">
                   <div className="block-editor__head">
-                    <span className="block-editor__icon">{Icon && <Icon />}</span>
-                    <select value={f.icon} onChange={(e) => setArr('features', i, { icon: e.target.value })}>
+                    <span className="block-editor__icon">{f.imageUrl ? <img src={f.imageUrl} alt="" /> : Icon && <Icon />}</span>
+                    <select value={f.icon} onChange={(e) => setArr('features', i, { icon: e.target.value })} disabled={!!f.imageKey}>
                       {Object.keys(FEATURE_ICONS).map((k) => <option key={k} value={k}>{ICON_LABELS[k] ?? k}</option>)}
                     </select>
+                    {moveBtns('features', i)}
                     <button type="button" className="icon-btn" onClick={() => removeArr('features', i)}>✕</button>
                   </div>
+                  <ImageInput label="Ícono propio (opcional, PNG transparente)" folder="site" value={f.imageKey ?? null} url={f.imageUrl} aspect="3/1" onChange={(imageKey, imageUrl) => setArr('features', i, { imageKey, imageUrl })} />
                   <TrInput label="Título" value={f.title} onChange={(title) => setArr('features', i, { title })} lang={lang} />
                   <TrInput label="Texto" value={f.text} onChange={(t) => setArr('features', i, { text: t })} lang={lang} multiline rows={2} />
                 </div>
@@ -212,7 +242,7 @@ export default function SettingsAdmin() {
         <div className="card settings-card">
           {tabs}
           <div className="admin-head">
-            <p className="muted">Publica solo opiniones reales de clientes, con su permiso.</p>
+            <p className="muted">Publica solo opiniones reales de clientes, con su permiso. Cuando se active el inicio de sesión con Google, la portada muestra las reseñas de los visitantes (menú Reseñas) en lugar de estos testimonios.</p>
             <button type="button" className="btn btn--sm" onClick={() => set({ testimonials: [...s.testimonials, { name: '', country: '', rating: 5, text: {} }] })}>+ Agregar</button>
           </div>
           <div className="blocks-grid">
@@ -236,21 +266,143 @@ export default function SettingsAdmin() {
       {section === 'aliados' && (
         <div className="card settings-card">
           <div className="admin-head">
-            <p className="muted">Logos de gremios, certificaciones y plataformas (MINCETUR, PromPerú, TripAdvisor…). Usa solo los que la empresa tenga realmente.</p>
-            <button type="button" className="btn btn--sm" onClick={() => set({ partners: [...s.partners, { name: '', imageKey: null, url: '' }] })}>+ Agregar</button>
+            <p className="muted">Logos de gremios y certificaciones. Si adjuntas un PDF, al hacer clic en el logo se abre la vista previa del documento. Usa solo los que la empresa tenga realmente.</p>
+            <button type="button" className="btn btn--sm" onClick={() => set({ partners: [...s.partners, { name: '', imageKey: null, url: '', pdfKey: null }] })}>+ Agregar</button>
           </div>
           <div className="blocks-grid">
             {s.partners.map((p, i) => (
               <div key={i} className="block-editor">
                 <ImageInput label="Logo" folder="partners" value={p.imageKey} url={p.imageUrl} aspect="3/2" onChange={(imageKey, imageUrl) => setArr('partners', i, { imageKey, imageUrl })} />
                 <input placeholder="Nombre" value={p.name} onChange={(e) => setArr('partners', i, { name: e.target.value })} />
-                <input placeholder="Enlace (opcional)" value={p.url} onChange={(e) => setArr('partners', i, { url: e.target.value })} />
-                <button type="button" className="btn btn--sm btn--danger-ghost" onClick={() => removeArr('partners', i)}>Quitar</button>
+                <input placeholder="Enlace (opcional, si no hay PDF)" value={p.url} onChange={(e) => setArr('partners', i, { url: e.target.value })} />
+                <FileInput label="Documento PDF (constancia, licencia…)" kind="pdf" folder="docs" value={p.pdfKey} url={p.pdfUrl} onChange={(pdfKey, pdfUrl) => setArr('partners', i, { pdfKey, pdfUrl })} />
+                <div className="row-actions">{moveBtns('partners', i)}<button type="button" className="btn btn--sm btn--danger-ghost" onClick={() => removeArr('partners', i)}>Quitar</button></div>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {section === 'redes' && (
+        <div className="card settings-card">
+          <div className="two-col">
+            <div>
+              {text('facebook', 'Facebook (URL)')}
+              {text('instagram', 'Instagram (URL)')}
+              {text('youtube', 'YouTube (URL)')}
+              {text('tiktok', 'TikTok (URL)')}
+            </div>
+            <div>
+              <div className="admin-head">
+                <h2>Otras redes ({s.extraSocials.length})</h2>
+                <button type="button" className="btn btn--sm" onClick={() => set({ extraSocials: [...s.extraSocials, { name: '', url: '', imageKey: null }] })}>+ Agregar</button>
+              </div>
+              <p className="muted small">LinkedIn, Pinterest, X, TripAdvisor… Sube el ícono (PNG cuadrado) y el enlace. Aparecen en la barra superior y en el pie de página.</p>
+              {s.extraSocials.map((x, i) => (
+                <div key={i} className="block-editor social-editor">
+                  <ImageInput label="Ícono" folder="site" value={x.imageKey} url={x.imageUrl} aspect="1/1" onChange={(imageKey, imageUrl) => setArr('extraSocials', i, { imageKey, imageUrl })} />
+                  <div className="stack">
+                    <input placeholder="Nombre (ej. LinkedIn)" value={x.name} onChange={(e) => setArr('extraSocials', i, { name: e.target.value })} />
+                    <input placeholder="https://…" value={x.url} onChange={(e) => setArr('extraSocials', i, { url: e.target.value })} />
+                    <div className="row-actions">{moveBtns('extraSocials', i)}<button type="button" className="btn btn--sm btn--danger-ghost" onClick={() => removeArr('extraSocials', i)}>Quitar</button></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {section === 'felices' && (
+        <div className="card settings-card">
+          {tabs}
+          <div className="two-col">
+            <div>
+              <TrInput label="Antetítulo" value={s.happyEyebrow} onChange={(happyEyebrow) => set({ happyEyebrow })} lang={lang} />
+              <TrInput label="Título" value={s.happyTitle} onChange={(happyTitle) => set({ happyTitle })} lang={lang} hint="Déjalo vacío para ocultar la sección" />
+              <TrInput label="Texto" value={s.happyText} onChange={(happyText) => set({ happyText })} lang={lang} multiline rows={6} hint="Separa párrafos con una línea en blanco" />
+            </div>
+            <div>
+              <ImageInput label="Sello o premio (ej. Travelers' Choice)" folder="site" value={s.awardImageKey} url={s.awardImageUrl} aspect="1/1" onChange={(awardImageKey, awardImageUrl) => set({ awardImageKey, awardImageUrl })} />
+              <TrInput label="Nombre del premio" value={s.awardTitle} onChange={(awardTitle) => set({ awardTitle })} lang={lang} />
+              <TrInput label="Detalle (ej. 5 de 5 en 1 500 opiniones)" value={s.awardText} onChange={(awardText) => set({ awardText })} lang={lang} />
+              {text('awardUrl', 'Enlace del premio (opcional)')}
+            </div>
+          </div>
+          <div className="admin-head" style={{ marginTop: 16 }}>
+            <h2>Publicaciones de redes ({s.socialPosts.length})</h2>
+            <button type="button" className="btn btn--sm" onClick={() => set({ socialPosts: [...s.socialPosts, { imageKey: null, network: 'instagram', account: '', caption: {}, url: '' }] })}>+ Agregar</button>
+          </div>
+          <p className="muted small">Se muestran como una tarjeta de Instagram que rota cada 5 segundos; al hacer clic abre la publicación en la red social.</p>
+          <div className="blocks-grid">
+            {s.socialPosts.map((x, i) => (
+              <div key={i} className="block-editor">
+                <ImageInput label="Foto" folder="social" value={x.imageKey} url={x.imageUrl} aspect="1/1" onChange={(imageKey, imageUrl) => setArr('socialPosts', i, { imageKey, imageUrl })} />
+                <div className="two-col">
+                  <select value={x.network} onChange={(e) => setArr('socialPosts', i, { network: e.target.value })}>
+                    {NETWORKS.map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                  <input placeholder="Cuenta (ej. gomachupicchuperu)" value={x.account} onChange={(e) => setArr('socialPosts', i, { account: e.target.value })} />
+                </div>
+                <input placeholder="Enlace a la publicación" value={x.url} onChange={(e) => setArr('socialPosts', i, { url: e.target.value })} />
+                <TrInput label="Texto de la publicación" value={x.caption} onChange={(caption) => setArr('socialPosts', i, { caption })} lang={lang} />
+                <div className="row-actions">{moveBtns('socialPosts', i)}<button type="button" className="btn btn--sm btn--danger-ghost" onClick={() => removeArr('socialPosts', i)}>Quitar</button></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {section === 'videos' && (
+        <div className="card settings-card">
+          {tabs}
+          <TrInput label="Título de la sección" value={s.videosTitle} onChange={(videosTitle) => set({ videosTitle })} lang={lang} />
+          <div className="admin-head">
+            <p className="muted">Hasta 20 videos cortos verticales. En la portada se ven 4 por página en carrusel. Recomendado: MP4, menos de 15 MB y menos de 60 s.</p>
+            <button type="button" className="btn btn--sm" disabled={s.videos.length >= 20} onClick={() => set({ videos: [...s.videos, { videoKey: null, posterKey: null, title: {} }] })}>+ Agregar ({s.videos.length}/20)</button>
+          </div>
+          <div className="blocks-grid blocks-grid--videos">
+            {s.videos.map((v, i) => (
+              <div key={i} className="block-editor">
+                <div className="block-editor__head"><strong>Video {i + 1}</strong>{moveBtns('videos', i)}<button type="button" className="icon-btn" onClick={() => removeArr('videos', i)}>✕</button></div>
+                <FileInput label="Video" kind="video" folder="videos" value={v.videoKey} url={v.videoUrl} poster={v.posterUrl} onChange={(videoKey, videoUrl) => setArr('videos', i, { videoKey, videoUrl })} />
+                <ImageInput label="Portada (opcional)" folder="videos" value={v.posterKey} url={v.posterUrl} aspect="9/16" onChange={(posterKey, posterUrl) => setArr('videos', i, { posterKey, posterUrl })} />
+                <TrInput label="Título (opcional)" value={v.title} onChange={(title) => setArr('videos', i, { title })} lang={lang} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {section === 'infomenu' && (
+        <div className="card settings-card">
+          {tabs}
+          <div className="admin-head">
+            <p className="muted">Columnas del menú "Info útil". Cada página se asigna a un grupo en Páginas "Info útil". Las páginas marcadas como destacadas se muestran con imagen a la derecha.</p>
+            <button type="button" className="btn btn--sm" onClick={() => set({ infoGroups: [...s.infoGroups, { key: `grupo-${s.infoGroups.length + 1}`, icon: 'info', title: {} }] })}>+ Agregar grupo</button>
+          </div>
+          <div className="blocks-grid">
+            {s.infoGroups.map((g, i) => {
+              const Icon = INFO_ICONS[g.icon]
+              return (
+                <div key={i} className="block-editor">
+                  <div className="block-editor__head">
+                    <span className="block-editor__icon">{Icon && <Icon />}</span>
+                    <select value={g.icon} onChange={(e) => setArr('infoGroups', i, { icon: e.target.value })}>
+                      {Object.keys(INFO_ICONS).map((k) => <option key={k} value={k}>{INFO_ICON_LABELS[k] ?? k}</option>)}
+                    </select>
+                    {moveBtns('infoGroups', i)}
+                    <button type="button" className="icon-btn" onClick={() => removeArr('infoGroups', i)}>✕</button>
+                  </div>
+                  <TrInput label="Título" value={g.title} onChange={(title) => setArr('infoGroups', i, { title })} lang={lang} />
+                  <Field label="Clave interna" hint="Identifica al grupo; si la cambias, reasigna sus páginas"><input value={g.key} onChange={(e) => setArr('infoGroups', i, { key: e.target.value })} /></Field>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {section === 'chatbot' && (
         <div className="card settings-card narrow">
           {tabs}
