@@ -18,6 +18,7 @@ const SECTIONS = [
   ['videos', 'Videos'],
   ['aliados', 'Certificaciones (PDF)'],
   ['infomenu', 'Menú Info útil'],
+  ['seo', 'SEO y Google'],
   ['chatbot', 'Asistente virtual'],
 ] as const
 type Section = (typeof SECTIONS)[number][0]
@@ -68,7 +69,7 @@ export default function SettingsAdmin() {
   )
 
   const allTr: Array<Tr | undefined> = [s.tagline, s.heroTitle, s.heroSubtitle, s.about, s.officeHours,
-    s.chatbotGreeting, s.trustTitle, s.trustText, s.whyTitle, s.happyEyebrow, s.happyTitle, s.happyText, s.awardTitle, s.awardText, s.videosTitle,
+    s.chatbotGreeting, s.trustTitle, s.trustText, s.whyTitle, s.happyEyebrow, s.happyTitle, s.happyText, s.awardTitle, s.awardText, s.videosTitle, s.seoTitle, s.seoDescription,
     ...s.features.flatMap((f) => [f.title, f.text]), ...s.steps.flatMap((x) => [x.title, x.text]), ...s.testimonials.map((x) => x.text),
     ...s.socialPosts.map((x) => x.caption), ...s.videos.map((v) => v.title), ...s.infoGroups.map((g) => g.title)]
   const tabs = <LangTabs lang={lang} onChange={setLang} missing={missingLangs(allTr)} enabled={s.languages} />
@@ -373,6 +374,26 @@ export default function SettingsAdmin() {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {section === 'seo' && (
+        <div className="card settings-card">
+          {tabs}
+          <p className="muted">Cómo aparece la portada en Google y al compartir el enlace por WhatsApp o Facebook. Cada tour, destino y página usa su propio título y resumen automáticamente.</p>
+          <TrInput label="Título para Google (máx. 60 caracteres)" value={s.seoTitle} onChange={(seoTitle) => set({ seoTitle })} lang={lang} maxLength={70} hint={`${(s.seoTitle?.[lang] ?? '').length} caracteres. Incluye lo que la gente busca: "Tours en Cusco", "Machu Picchu".`} />
+          <TrInput label="Descripción para Google (máx. 160 caracteres)" value={s.seoDescription} onChange={(seoDescription) => set({ seoDescription })} lang={lang} multiline rows={3} maxLength={170} hint={`${(s.seoDescription?.[lang] ?? '').length} caracteres. Es el texto bajo el título en los resultados de búsqueda.`} />
+          {text('gaMeasurementId', 'Google Analytics 4 (ID de medición)', 'Formato G-XXXXXXXXXX. Déjalo vacío si no usas Analytics.')}
+          <div className="notice card">
+            <strong>Checklist para que Google encuentre el sitio</strong>
+            <ol className="small">
+              <li>Registra el sitio en <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer">Google Search Console</a> (propiedad "Prefijo de URL" con la dirección del sitio).</li>
+              <li>Verifícalo con la "Etiqueta HTML": copia solo el código de <code>content="…"</code> en la variable <code>VITE_GOOGLE_SITE_VERIFICATION</code> del servicio frontend en Railway y vuelve a desplegarlo.</li>
+              <li>En Search Console → Sitemaps, envía: <code>{import.meta.env.VITE_API_URL || 'https://<backend>'}/sitemap.xml</code></li>
+              <li>Crea o reclama tu ficha en <a href="https://business.google.com" target="_blank" rel="noreferrer">Google Business Profile</a> con la misma dirección, teléfono y enlace al sitio.</li>
+              <li>Usa un dominio propio (ej. gomachupicchuperu.com): un subdominio de railway.app posiciona peor y no transmite confianza.</li>
+            </ol>
           </div>
         </div>
       )}

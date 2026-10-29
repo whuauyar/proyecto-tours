@@ -182,6 +182,9 @@ export interface SiteSettings {
   videos: ShortVideo[]
   infoGroups: InfoGroup[]
   googleClientId?: string | null
+  seoTitle: Tr
+  seoDescription: Tr
+  gaMeasurementId: string
   features: Feature[]
   steps: Step[]
   testimonials: Testimonial[]

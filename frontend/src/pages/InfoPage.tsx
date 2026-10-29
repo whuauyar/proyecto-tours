@@ -5,11 +5,13 @@ import type { PageItem } from '../types'
 import Img from '../components/Img'
 import { L, Paragraphs } from '../components/common'
 import NotFound from './NotFound'
+import { useSeo } from '../seo'
 
 export default function InfoPage() {
   const { slug } = useParams()
   const { t, tr } = useI18n()
   const { data: page, loading, error } = useFetch<PageItem>(`/api/pages/${slug}`)
+  useSeo({ title: page ? tr(page.title) : null, description: page ? tr(page.summary) || tr(page.body) : null, image: page?.imageUrl })
   if (loading) return <div className="container section muted">{t('loading')}</div>
   if (error || !page) return <NotFound />
   return (

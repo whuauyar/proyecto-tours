@@ -20,6 +20,9 @@ export default class SettingsController {
     if (input.defaultLanguage && !(input.languages ?? LANGS).includes(input.defaultLanguage)) {
       return response.unprocessableEntity({ errors: [{ field: 'defaultLanguage', message: 'El idioma por defecto debe estar activo' }] })
     }
+    if (input.gaMeasurementId !== undefined && !/^(G-[A-Z0-9]{4,20})?$/i.test(String(input.gaMeasurementId).trim())) {
+      return response.unprocessableEntity({ errors: [{ field: 'gaMeasurementId', message: 'El ID de Google Analytics tiene la forma G-XXXXXXXXXX' }] })
+    }
     for (const c of ['primaryColor', 'accentColor']) {
       if (input[c] && !/^#[0-9a-f]{6}$/i.test(input[c])) delete input[c]
     }

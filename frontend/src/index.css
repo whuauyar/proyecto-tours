@@ -477,10 +477,13 @@ body:has(.mobile-book) .bot-launcher, body:has(.mobile-book) .bot { bottom: 84px
 .social-icons--top .social { width: 24px; height: 24px; }
 .social-icons--top .social svg { width: 13px; height: 13px; }
 .social-icons--footer { margin: 12px 0; }
-.topbar .social { color: #fff; }
+.topbar .social { color: #fff; display: grid; place-items: center; gap: 0; padding: 0; line-height: 0; }
+.topbar .social svg { display: block; margin: auto; }
+.social-icons--top { align-self: center; }
 
 /* ===== Mega-menú Info útil ===== */
 .dd--wide { position: static; }
+.dd--wide .dd__panel::before { inset: -30px 0 auto 0; height: 30px; }
 .dd--wide .dd__panel { left: 0; right: 0; transform: none; top: 100%; border-radius: 0 0 var(--radius) var(--radius); padding: 24px 0; max-height: calc(100vh - 120px); overflow-y: auto; }
 .info-mega { display: grid; grid-template-columns: 1fr 240px; gap: 32px; }
 .info-mega__groups { columns: 3 220px; column-gap: 28px; }
@@ -651,3 +654,6 @@ body:has(.mobile-book) .bot-launcher, body:has(.mobile-book) .bot { bottom: 84px
 .review-form__or { display: flex; align-items: center; gap: 10px; width: 100%; color: var(--ink-2); font-size: 0.82rem; }
 .review-form__or::before, .review-form__or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+.brand__name { white-space: nowrap; }
+@media (max-width: 420px) { .brand__name { font-size: 0.95rem; white-space: normal; } }

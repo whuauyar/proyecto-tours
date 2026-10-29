@@ -20,7 +20,6 @@ export function SiteProvider({ children }: { children: ReactNode }) {
   useEffect(load, [])
   useEffect(() => {
     if (!site) return
-    document.title = site.name
     // Colores de marca configurables desde el panel
     const root = document.documentElement.style
     if (site.primaryColor) root.setProperty('--primary', site.primaryColor)

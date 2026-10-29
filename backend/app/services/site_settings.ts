@@ -63,6 +63,10 @@ export interface SiteSettings {
   videos: Array<{ videoKey: string | null; posterKey: string | null; title: Tr }>
   /** Grupos del mega-menú "Info útil" */
   infoGroups: Array<{ key: string; icon: string; title: Tr }>
+  // SEO y Google
+  seoTitle: Tr
+  seoDescription: Tr
+  gaMeasurementId: string
   steps: Array<{ title: Tr; text: Tr }>
   testimonials: Array<{ name: string; country: string; rating: number; text: Tr }>
   partners: Array<{ name: string; imageKey: string | null; url: string; pdfKey?: string | null }>
@@ -150,6 +154,19 @@ export const DEFAULT_SITE: SiteSettings = {
   socialPosts: [],
   videosTitle: t('Viajeros en Machu Picchu', 'Travelers at Machu Picchu', 'Viajantes em Machu Picchu', '马丘比丘的旅客'),
   videos: [],
+  seoTitle: t(
+    'Tours en Cusco y Machu Picchu | Agencia de viajes local',
+    'Cusco & Machu Picchu Tours | Local travel agency',
+    'Passeios em Cusco e Machu Picchu | Agência local',
+    '库斯科与马丘比丘旅游 | 本地旅行社'
+  ),
+  seoDescription: t(
+    'Tours a Machu Picchu, Camino Inca, Valle Sagrado y Lago Titicaca con guías locales. Precios directos y atención por WhatsApp.',
+    'Machu Picchu, Inca Trail, Sacred Valley and Lake Titicaca tours with local guides. Direct prices and WhatsApp support.',
+    'Passeios a Machu Picchu, Trilha Inca, Vale Sagrado e Lago Titicaca com guias locais. Preços diretos e atendimento por WhatsApp.',
+    '马丘比丘、印加古道、圣谷和的的喀喀湖之旅，本地导游带队，直销价格，WhatsApp 咨询。'
+  ),
+  gaMeasurementId: '',
   infoGroups: [
     { key: 'viajero', icon: 'info', title: t('Datos para el viajero', 'Traveler tips', 'Dicas para o viajante', '旅行须知') },
     { key: 'clima', icon: 'cloud', title: t('Geografía y climas', 'Geography & climate', 'Geografia e clima', '地理与气候') },

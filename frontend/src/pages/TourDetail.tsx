@@ -9,6 +9,7 @@ import TourCard from '../components/TourCard'
 import { IconCheck, IconClock, IconMountain, IconPin, IconUsers, IconX } from '../components/Icons'
 import { FaqList, L, Paragraphs, Stars, useDuration, waLink } from '../components/common'
 import NotFound from './NotFound'
+import { useSeo } from '../seo'
 
 export default function TourDetail() {
   const { slug } = useParams()
@@ -17,6 +18,28 @@ export default function TourDetail() {
   const duration = useDuration()
   const { data: tour, loading, error } = useFetch<Tour>(`/api/tours/${slug}`)
   const [active, setActive] = useState(0)
+  useSeo({
+    title: tour ? tr(tour.title) : null,
+    description: tour ? tr(tour.summary) : null,
+    image: tour?.coverUrl,
+    jsonLd: tour && {
+      '@context': 'https://schema.org',
+      '@type': 'TouristTrip',
+      name: tr(tour.title),
+      description: tr(tour.summary),
+      image: tour.coverUrl || undefined,
+      touristType: tr(tour.category?.name),
+      itinerary: tour.destination ? { '@type': 'Place', name: tr(tour.destination.name) } : undefined,
+      offers: {
+        '@type': 'Offer',
+        price: tour.discountPercent ? tour.offerPrice : tour.price,
+        priceCurrency: tour.currency,
+        availability: 'https://schema.org/InStock',
+        url: window.location.href,
+      },
+      provider: { '@type': 'TravelAgency', name: site?.name, url: window.location.origin },
+    },
+  })
 
   if (loading) return <div className="container section muted">{t('loading')}</div>
   if (error || !tour) return <NotFound />

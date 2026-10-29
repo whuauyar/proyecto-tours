@@ -57,7 +57,7 @@ export default function HeroSearch() {
   }
   const submit = (e: FormEvent) => {
     e.preventDefault()
-    if (open && items && active >= 0 && items[active]) return navigate(path(`/tours/${items[active].slug}`))
+    if (open && items && active >= 0 && items[active]) return navigate(path(`/tour/${items[active].slug}`))
     goAll()
   }
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -112,7 +112,7 @@ export default function HeroSearch() {
                     aria-selected={i === active}
                     className={`suggest__item ${i === active ? 'is-active' : ''}`}
                     onMouseEnter={() => setActive(i)}
-                    onClick={() => navigate(path(`/tours/${tour.slug}`))}
+                    onClick={() => navigate(path(`/tour/${tour.slug}`))}
                   >
                     <Img src={tour.coverUrl} alt="" />
                     <span>

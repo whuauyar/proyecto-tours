@@ -3,6 +3,7 @@ import { useI18n } from '../i18n'
 import { useFetch, useSite } from '../site'
 import type { Tour } from '../types'
 import TourCard from '../components/TourCard'
+import { useSeo } from '../seo'
 
 export default function Tours() {
   const [params, setParams] = useSearchParams()
@@ -33,6 +34,7 @@ export default function Tours() {
   }
   const destName = tr(nav.destinations.find((d) => d.slug === dest)?.name)
   const typeName = tr(nav.categories.find((c) => c.slug === tipo)?.name)
+  useSeo({ title: destName ?? typeName ?? t('allTours'), description: tr(nav.destinations.find((d) => d.slug === dest)?.summary) })
 
   return (
     <>

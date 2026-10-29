@@ -7,12 +7,14 @@ import TourCard from '../components/TourCard'
 import { IconCheck } from '../components/Icons'
 import { L, Paragraphs } from '../components/common'
 import NotFound from './NotFound'
+import { useSeo } from '../seo'
 
 export default function DestinationPage() {
   const { slug } = useParams()
   const { t, tr } = useI18n()
   const { data: dest, loading, error } = useFetch<Destination>(`/api/destinations/${slug}`)
   const { data: tours } = useFetch<Tour[]>(`/api/tours?destination=${slug}`)
+  useSeo({ title: dest ? `${t('toursIn')} ${tr(dest.name)}` : null, description: dest ? tr(dest.summary) || tr(dest.description) : null, image: dest?.imageUrl })
   if (loading) return <div className="container section muted">{t('loading')}</div>
   if (error || !dest) return <NotFound />
   const highlights = tr(dest.highlights) ?? []

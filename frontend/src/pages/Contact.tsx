@@ -3,11 +3,13 @@ import { useFetch, useSite } from '../site'
 import type { Faq } from '../types'
 import InquiryForm from '../components/InquiryForm'
 import { FaqList, waLink } from '../components/common'
+import { useSeo } from '../seo'
 
 export default function Contact() {
   const { t, tr } = useI18n()
   const { site } = useSite()
   const { data: faqs } = useFetch<Faq[]>('/api/faqs')
+  useSeo({ title: t('contact'), description: t('customTripText') })
   return (
     <>
       <section className="page-head"><div className="container"><h1>{t('contact')}</h1><p>{t('customTripText')}</p></div></section>

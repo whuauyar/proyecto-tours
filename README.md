@@ -152,6 +152,16 @@ suscribir el campo `messages`.
 El ID de cliente es público por diseño (no es una clave secreta). Sin esa variable, el botón "Escribe tu reseña" no aparece.
 El servidor valida cada token con Google y comprueba que fue emitido para este ID; limita a una reseña por cuenta cada 24 h.
 
+## SEO (que Google encuentre el sitio)
+
+- Cada página genera su título, descripción, imagen para compartir (Open Graph), URL canónica y versiones por idioma (`hreflang`). La portada usa el título y la descripción de **Configuración → SEO y Google**.
+- Datos estructurados (JSON-LD): `TravelAgency` en la portada y `TouristTrip` con precio en cada tour.
+- `GET /sitemap.xml` (backend) lista portada, tours, destinos y páginas en todos los idiomas activos, con URLs del frontend (`SITE_URL`). El `robots.txt` del frontend lo enlaza (se genera en el build con `VITE_API_URL`).
+- Verificación de Google Search Console: variable `VITE_GOOGLE_SITE_VERIFICATION` del servicio frontend (solo el código del `content`), luego redesplegar.
+- Google Analytics 4 opcional: ID `G-…` en Configuración → SEO y Google.
+- Las páginas 404 llevan `noindex`.
+- Limitación: el sitio es una SPA; Google ejecuta JavaScript y lo indexa, pero más lento que un sitio con HTML renderizado en el servidor. Si el tráfico orgánico es prioridad, el siguiente paso es prerender/SSR.
+
 ## API (resumen)
 
 Pública: `GET /api/settings`, `GET /api/navigation` (destinos, tipos, páginas), `GET /api/destinations/:slug`, `GET /api/tours?destination=&category=&duration=day|multi&sort=price_asc|price_desc|duration&featured=1&q=`, `GET /api/tours/:slug` (incluye relacionados), `GET /api/faqs`, `GET /api/pages/:slug`, `POST /api/inquiries`, `GET|POST /api/reviews`, `POST /api/auth/login`, `GET /media/*`.

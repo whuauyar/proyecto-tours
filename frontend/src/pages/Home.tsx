@@ -12,6 +12,7 @@ import WhyUs from '../components/home/WhyUs'
 import ShortVideos from '../components/home/ShortVideos'
 import Reviews from '../components/home/Reviews'
 import Certifications from '../components/home/Certifications'
+import { useSeo } from '../seo'
 
 function Hero() {
   const { tr } = useI18n()
@@ -70,6 +71,22 @@ export default function Home() {
   const rest = all?.filter((x) => x.destination?.slug !== mainSlug) ?? []
   const others = [...rest.filter((x) => x.isFeatured), ...rest.filter((x) => !x.isFeatured)].slice(0, 4)
   const { data: faqs } = useFetch<Faq[]>('/api/faqs')
+  // Datos estructurados de la agencia (Google los usa para el panel de la empresa)
+  useSeo({
+    jsonLd: site && {
+      '@context': 'https://schema.org',
+      '@type': 'TravelAgency',
+      name: site.name,
+      legalName: site.legalName || undefined,
+      url: window.location.origin,
+      logo: site.logoUrl || undefined,
+      image: site.heroImageUrl || undefined,
+      telephone: site.phone || undefined,
+      email: site.email || undefined,
+      address: site.address ? { '@type': 'PostalAddress', streetAddress: site.address, addressCountry: 'PE' } : undefined,
+      sameAs: [site.facebook, site.instagram, site.youtube, site.tiktok, ...site.extraSocials.map((x) => x.url)].filter(Boolean),
+    },
+  })
 
   return (
     <>

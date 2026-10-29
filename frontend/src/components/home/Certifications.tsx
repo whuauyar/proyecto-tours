@@ -3,7 +3,6 @@ import { useI18n } from '../../i18n'
 import { useSite } from '../../site'
 import type { Partner } from '../../types'
 import Modal from '../Modal'
-import { IconFile } from '../Icons'
 
 /**
  * Logos de certificaciones y aliados. Si el logo tiene un PDF adjunto (constancia,
@@ -25,7 +24,6 @@ export default function Certifications() {
             return (
               <button key={i} type="button" className="partner partner--doc" title={`${p.name} · ${t('viewDocument')}`} onClick={() => setDoc(p)}>
                 {img}
-                <small><IconFile /> {t('viewDocument')}</small>
               </button>
             )
           }

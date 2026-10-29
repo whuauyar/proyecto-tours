@@ -7,6 +7,7 @@ import Img from './Img'
 import { INFO_ICONS, IconChevron, IconGlobe, IconInfo, IconMail, IconMenu, IconPhone, IconWhatsApp, IconX, SOCIAL_ICONS } from './Icons'
 import { L, waLink } from './common'
 import ChatBot from './ChatBot'
+import { useAnalytics } from '../seo'
 
 function useOutsideClose(onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null)
@@ -55,10 +56,23 @@ function Dropdown({ label, children, to, toLabel, wide = false }: { label: strin
   const [open, setOpen] = useState(false)
   const ref = useOutsideClose(() => setOpen(false))
   const loc = useLocation()
+  const timer = useRef<number | undefined>(undefined)
   useEffect(() => setOpen(false), [loc.pathname])
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+  // Con mouse: se abre al pasar y el clic no lo cierra (antes el clic cerraba lo que el hover abría).
+  // En pantallas táctiles: el toque abre/cierra.
+  const canHover = () => window.matchMedia?.('(hover: hover) and (pointer: fine)').matches
+  const show = () => { window.clearTimeout(timer.current); setOpen(true) }
+  const hideSoon = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(false), 250) }
   return (
-    <div className={`dd ${wide ? 'dd--wide' : ''} ${open ? 'is-open' : ''}`} ref={ref} onMouseLeave={() => setOpen(false)}>
-      <button className="dd__btn" onClick={() => setOpen(!open)} onMouseEnter={() => setOpen(true)} aria-expanded={open}>
+    <div
+      className={`dd ${wide ? 'dd--wide' : ''} ${open ? 'is-open' : ''}`}
+      ref={ref}
+      onMouseEnter={() => canHover() && show()}
+      onMouseLeave={() => canHover() && hideSoon()}
+      onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+    >
+      <button className="dd__btn" onClick={() => (canHover() ? show() : setOpen(!open))} aria-expanded={open}>
         {label} <IconChevron />
       </button>
       <div className="dd__panel">
@@ -183,21 +197,17 @@ function Header() {
   const loc = useLocation()
   useEffect(() => setOpen(false), [loc.pathname])
   useEffect(() => setLogoFailed(false), [site?.logoUrl])
-  // Con logo válido se muestra solo el logo (normalmente ya incluye el nombre);
-  // si no hay logo o no carga, se muestra el símbolo + el nombre, nunca ambos duplicados.
+  // Logo (si existe y carga) + nombre del negocio. El logo lleva alt vacío para que,
+  // si falla, el navegador no repita el nombre como texto alternativo.
   const showLogo = !!site?.logoUrl && !logoFailed
   return (
     <header className="site-header">
       <div className="container site-header__inner">
         <L to="/" className="brand">
-          {showLogo ? (
-            <img src={site!.logoUrl!} alt={site?.name ?? ''} onError={() => setLogoFailed(true)} />
-          ) : (
-            <>
-              <span className="brand__mark">▲</span>
-              <span>{site?.name ?? ''}</span>
-            </>
-          )}
+          {showLogo
+            ? <img src={site!.logoUrl!} alt="" onError={() => setLogoFailed(true)} />
+            : <span className="brand__mark" aria-hidden="true">▲</span>}
+          <span className="brand__name">{site?.name ?? ''}</span>
         </L>
 
         <nav className={`main-nav ${open ? 'is-open' : ''}`} aria-label="Principal">
@@ -286,6 +296,7 @@ function Footer() {
 
 export default function Layout() {
   const { site } = useSite()
+  useAnalytics(site?.gaMeasurementId)
   const { t } = useI18n()
   const { pathname, hash } = useLocation()
   useEffect(() => {

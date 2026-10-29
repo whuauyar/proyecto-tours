@@ -19,10 +19,12 @@ const ToursController = () => import('#controllers/admin/tours_controller')
 const SettingsController = () => import('#controllers/admin/settings_controller')
 const InquiriesController = () => import('#controllers/admin/inquiries_controller')
 const ReviewsController = () => import('#controllers/reviews_controller')
+const SitemapController = () => import('#controllers/sitemap_controller')
 
 router.get('/', async () => ({ name: 'tours-api', status: 'ok' }))
 router.get('/health', async () => ({ status: 'ok' }))
 router.get('/media/*', [MediaController, 'show'])
+router.get('/sitemap.xml', [SitemapController, 'show'])
 
 /** Webhook del bot de WhatsApp (Meta WhatsApp Cloud API) */
 router.get('/webhooks/whatsapp', [WhatsappController, 'verify'])
